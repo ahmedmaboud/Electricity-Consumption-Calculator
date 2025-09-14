@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:google_mlkit_text_recognition/google_mlkit_text_recognition.dart';
@@ -98,7 +99,7 @@ class OCRPage extends StatelessWidget {
               if (isLoading.value) {
                 return Column(
                   children: [
-                    CircularProgressIndicator(),
+                    SpinKitWave(color: Colors.yellow, size: 50.0),
                     SizedBox(height: 10),
                     Text("Processing image...", style: TextStyle(fontSize: 16)),
                   ],

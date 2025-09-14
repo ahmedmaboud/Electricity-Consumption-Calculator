@@ -38,6 +38,7 @@ dependencies:
   dartx: ^1.2.0
   google_mlkit_text_recognition: ^0.15.0
   image_picker: ^1.2.0
+  flutter_spinkit: ^5.2.2
 
 dev_dependencies:
   flutter_test:
