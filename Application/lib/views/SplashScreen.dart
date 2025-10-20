@@ -2,7 +2,6 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:graduation_project_depi/views/loginPage.dart';
 
-
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
 
@@ -15,16 +14,13 @@ class _SplashScreenState extends State<SplashScreen> {
   void initState() {
     super.initState();
     // This is where the 3-second timer is set up.
-    Timer(
-      const Duration(seconds: 5),
-      () {
-        // After 3 seconds, it will replace the splash screen with the LoginScreen.
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => const LoginScreen()),
-        );
-      },
-    );
+    Timer(const Duration(seconds: 5), () {
+      // After 3 seconds, it will replace the splash screen with the LoginScreen.
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const LoginScreen()),
+      );
+    });
   }
 
   @override
@@ -37,7 +33,10 @@ class _SplashScreenState extends State<SplashScreen> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             // Your Photo/Icon goes here
-            Image.asset("assets/photos/icons8-lightning-bolt-100.png",scale: 2,),
+            Image.asset(
+              "assets/photos/icons8-lightning-bolt-100.png",
+              scale: 2,
+            ),
             const SizedBox(height: 24),
             // A loading indicator to show that the app is preparing
             CircularProgressIndicator(
