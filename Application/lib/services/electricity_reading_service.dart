@@ -1,11 +1,13 @@
 import 'dart:convert';
 
+import 'package:get/get.dart';
 import 'package:graduation_project_depi/entities/reading.dart';
 import 'package:graduation_project_depi/main.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class ElectricityReadingService {
   final String _tableName = 'electricity_reading';
-
+  final cloud = Get.find<SupabaseClient>();
   Future<bool> insertReading(Reading reading) async {
     try {
       await cloud.from(_tableName).insert({

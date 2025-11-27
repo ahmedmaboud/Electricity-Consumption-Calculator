@@ -16,9 +16,11 @@ class RegisterScreen extends StatelessWidget {
               // Constrain the width for larger screens for better readability
               constraints: const BoxConstraints(maxWidth: 500),
               padding: EdgeInsets.symmetric(
-                horizontal: sizeConfig.screenWidth * (sizeConfig.isMobile ? 0.08 : 0.04),
+                horizontal:
+                    sizeConfig.screenWidth *
+                    (sizeConfig.isMobile ? 0.08 : 0.04),
               ),
-              child: const RegisterForm(),
+              child: RegisterForm(),
             ),
           ),
         ),

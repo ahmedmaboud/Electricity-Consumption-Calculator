@@ -17,10 +17,11 @@ class UserSession {
     if (authUser == null) return;
 
     final result = await _supabase
-        .from('User')
+        .from('user_profile')
         .select('*')
         .eq('auth_id', authUser.id)
         .single();
+    result['email'] = authUser.email;
 
     currentUser = userFromJson(json.encode(result));
   }

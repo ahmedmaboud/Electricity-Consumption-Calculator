@@ -1,9 +1,10 @@
-import 'package:graduation_project_depi/main.dart';
+import 'package:get/get.dart';
 import 'package:graduation_project_depi/user_session.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class AuthService {
-  Future<bool> register(String email, String password) async {
+  final cloud = Get.find<SupabaseClient>();
+  Future<bool> register(String email, String password, String name) async {
     try {
       final authResponse = await cloud.auth.signUp(
         email: email,
@@ -12,12 +13,18 @@ class AuthService {
 
       final authUser = authResponse.user;
       if (authUser == null) return false;
+
+      // Insert into your custom profile table
+      await cloud.from('user_profile').insert({
+        'auth_id': authUser.id,
+        'name': name,
+      });
+
       await UserSession().loadUserInfo();
 
       return true;
-    } on AuthRetryableFetchException {
-      rethrow;
     } catch (e) {
+      print('Register error: $e');
       return false;
     }
   }
@@ -38,6 +45,7 @@ class AuthService {
     } on AuthRetryableFetchException {
       rethrow;
     } catch (e) {
+      print("LOGIN ERROR: $e");
       return false;
     }
   }

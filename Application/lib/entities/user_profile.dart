@@ -7,23 +7,19 @@ String userToJson(UserProfile data) => json.encode(data.toJson());
 class UserProfile {
   final String authId;
   final String email;
-  final DateTime createdAt;
+  final String name;
 
-  UserProfile({
-    required this.authId,
-    required this.email,
-    required this.createdAt,
-  });
+  UserProfile({required this.authId, required this.name, required this.email});
 
   factory UserProfile.fromJson(Map<String, dynamic> json) => UserProfile(
     authId: json["auth_id"],
+    name: json["name"],
     email: json["email"],
-    createdAt: DateTime.parse(json["created_at"]),
   );
 
   Map<String, dynamic> toJson() => {
     "auth_id": authId,
+    "name": name,
     "email": email,
-    "created_at": createdAt.toIso8601String(),
   };
 }

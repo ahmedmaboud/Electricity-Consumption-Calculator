@@ -159,7 +159,7 @@ class CalculatorPage extends StatelessWidget {
                             'Your consumption: ${consum.toStringAsFixed(0)} kWh';
 
                         Get.snackbar(
-                          'Success ✅',
+                          'Success',
                           'Electricity bill calculated successfully!',
                           backgroundColor: Colors.green.shade400,
                           colorText: Colors.white,

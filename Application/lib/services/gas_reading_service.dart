@@ -1,9 +1,12 @@
 import 'dart:convert';
 
+import 'package:get/get.dart';
 import 'package:graduation_project_depi/entities/reading.dart';
 import 'package:graduation_project_depi/main.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class GasReadingService {
+  final cloud = Get.find<SupabaseClient>();
   Future<void> loadReadings() async {
     final result = await cloud.from('electricity_reading').select();
     print(json.encode(result));

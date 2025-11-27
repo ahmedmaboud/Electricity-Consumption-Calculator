@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:graduation_project_depi/views/loginPage.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -16,10 +17,7 @@ class _SplashScreenState extends State<SplashScreen> {
     // This is where the 3-second timer is set up.
     Timer(const Duration(seconds: 5), () {
       // After 3 seconds, it will replace the splash screen with the LoginScreen.
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => const LoginScreen()),
-      );
+      Get.toNamed('/login');
     });
   }
 

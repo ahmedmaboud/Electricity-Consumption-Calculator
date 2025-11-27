@@ -20,9 +20,10 @@ class LoginScreen extends StatelessWidget {
               padding: EdgeInsets.symmetric(
                 // Use a different padding for mobile vs. larger screens
                 horizontal:
-                    sizeConfig.screenWidth * (sizeConfig.isMobile ? 0.08 : 0.04),
+                    sizeConfig.screenWidth *
+                    (sizeConfig.isMobile ? 0.08 : 0.04),
               ),
-              child: const LoginForm(),
+              child: LoginForm(),
             ),
           ),
         ),
@@ -30,4 +31,3 @@ class LoginScreen extends StatelessWidget {
     );
   }
 }
-

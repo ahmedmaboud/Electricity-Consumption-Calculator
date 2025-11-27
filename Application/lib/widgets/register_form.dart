@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:graduation_project_depi/controllers/register_form_controller.dart';
 import '../utils/size_config.dart';
 
-class RegisterForm extends StatelessWidget {
-  const RegisterForm({super.key});
-
+class RegisterForm extends GetView<RegisterFormController> {
+  RegisterForm({super.key});
   @override
   Widget build(BuildContext context) {
     final sizeConfig = SizeConfig.of(context);
@@ -34,25 +35,29 @@ class RegisterForm extends StatelessWidget {
         ),
         SizedBox(height: sizeConfig.isMobile ? 40 : 50),
         _buildTextField(
+          cont: controller.nameController,
           sizeConfig: sizeConfig,
           hintText: 'Full Name',
           prefixIcon: Icons.person_outline_rounded,
         ),
         SizedBox(height: sizeConfig.isMobile ? 16 : 24),
         _buildTextField(
+          cont: controller.emailController,
           sizeConfig: sizeConfig,
           hintText: 'Email Address',
           prefixIcon: Icons.email_outlined,
         ),
         SizedBox(height: sizeConfig.isMobile ? 16 : 24),
         _buildTextField(
+          cont: controller.passwordController,
           sizeConfig: sizeConfig,
           hintText: 'Password',
           prefixIcon: Icons.lock_outline_rounded,
           obscureText: true,
         ),
-         SizedBox(height: sizeConfig.isMobile ? 16 : 24),
+        SizedBox(height: sizeConfig.isMobile ? 16 : 24),
         _buildTextField(
+          cont: controller.confirmPasswordController,
           sizeConfig: sizeConfig,
           hintText: 'Confirm Password',
           prefixIcon: Icons.lock_outline_rounded,
@@ -74,8 +79,7 @@ class RegisterForm extends StatelessWidget {
             ),
             TextButton(
               onPressed: () {
-                // Navigate back to the login screen
-                Navigator.pop(context);
+                Get.back();
               },
               child: Text(
                 'Sign In',
@@ -94,6 +98,7 @@ class RegisterForm extends StatelessWidget {
 
   // Helper widget for TextFields
   Widget _buildTextField({
+    required TextEditingController cont,
     required SizeConfig sizeConfig,
     required String hintText,
     required IconData prefixIcon,
@@ -101,6 +106,7 @@ class RegisterForm extends StatelessWidget {
   }) {
     return TextField(
       obscureText: obscureText,
+      controller: cont,
       style: TextStyle(fontSize: sizeConfig.isMobile ? 16 : 18),
       decoration: InputDecoration(
         hintText: hintText,
@@ -130,9 +136,25 @@ class RegisterForm extends StatelessWidget {
   // Helper widget for the Register Button
   Widget _buildRegisterButton(BuildContext context, SizeConfig sizeConfig) {
     return GestureDetector(
-      onTap: () {
-        // TODO: Implement registration logic
+      onTap: () async {
+        final success = await controller.signUp(
+          controller.emailController.text,
+          controller.passwordController.text,
+          controller.nameController.text,
+        );
+
+        if (success) {
+          Get.toNamed('/calculator_page');
+        } else {
+          Get.snackbar(
+            "Error",
+            "Registration failed",
+            backgroundColor: Colors.red,
+            colorText: Colors.white,
+          );
+        }
       },
+
       child: Container(
         padding: EdgeInsets.symmetric(vertical: sizeConfig.isMobile ? 18 : 22),
         decoration: BoxDecoration(
@@ -148,7 +170,7 @@ class RegisterForm extends StatelessWidget {
               spreadRadius: 2,
               blurRadius: 8,
               offset: const Offset(0, 4),
-            )
+            ),
           ],
         ),
         child: Center(
