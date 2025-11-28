@@ -4,7 +4,7 @@ import 'package:graduation_project_depi/controllers/register_form_controller.dar
 import '../utils/size_config.dart';
 
 class RegisterForm extends GetView<RegisterFormController> {
-  RegisterForm({super.key});
+  const RegisterForm({super.key});
   @override
   Widget build(BuildContext context) {
     final sizeConfig = SizeConfig.of(context);
@@ -137,14 +137,23 @@ class RegisterForm extends GetView<RegisterFormController> {
   Widget _buildRegisterButton(BuildContext context, SizeConfig sizeConfig) {
     return GestureDetector(
       onTap: () async {
-        final success = await controller.signUp(
-          controller.emailController.text,
-          controller.passwordController.text,
-          controller.nameController.text,
-        );
+        final mail = controller.emailController.text.trim();
+        final pass = controller.passwordController.text.trim();
+        final confirm = controller.confirmPasswordController.text.trim();
+        final name = controller.nameController.text.trim();
+        if (!controller.validatePasswords(pass, confirm)) return;
+
+        final success = await controller.signUp(mail, pass, name);
 
         if (success) {
-          Get.toNamed('/calculator_page');
+          Get.snackbar(
+            "Success",
+            "Registration Success, Confirm your email",
+
+            backgroundColor: Colors.blue.shade400,
+            colorText: Colors.white,
+          );
+          Get.offAllNamed('/login');
         } else {
           Get.snackbar(
             "Error",

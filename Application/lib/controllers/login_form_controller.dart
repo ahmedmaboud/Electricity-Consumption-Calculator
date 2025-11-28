@@ -7,13 +7,6 @@ class LoginFormController extends GetxController {
   final mailController = TextEditingController();
   final passwordController = TextEditingController();
 
-  @override
-  void onClose() {
-    mailController.dispose();
-    passwordController.dispose();
-    super.onClose();
-  }
-
   Future<bool> login(String mail, String password) async {
     return await authService.login(mail, password);
   }

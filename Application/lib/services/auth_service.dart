@@ -46,7 +46,7 @@ class AuthService {
       rethrow;
     } catch (e) {
       print("LOGIN ERROR: $e");
-      return false;
+      rethrow;
     }
   }
 

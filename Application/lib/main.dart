@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:graduation_project_depi/controllers/calculator_page_controller.dart';
 import 'package:graduation_project_depi/user_session.dart';
 import 'package:graduation_project_depi/views/RegisterPgae.dart';
 import 'package:graduation_project_depi/views/SplashScreen.dart';
@@ -30,15 +31,23 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return GetMaterialApp(
       initialBinding: BindingsBuilder(() {
-        Get.lazyPut<SupabaseClient>(() => Supabase.instance.client);
-        Get.lazyPut<AuthService>(() => AuthService());
+        Get.put<SupabaseClient>(Supabase.instance.client);
+        Get.put<AuthService>(AuthService());
       }),
       debugShowCheckedModeBanner: false,
       initialRoute: '/splash_screen',
       // home: FirstPage(),
       getPages: [
         GetPage(name: '/splash_screen', page: () => SplashScreen()),
-        GetPage(name: '/calculator_page', page: () => CalculatorPage()),
+        GetPage(
+          name: '/calculator_page',
+          page: () => CalculatorPage(),
+          binding: BindingsBuilder(
+            () => Get.lazyPut<CalculatorPageController>(
+              () => CalculatorPageController(),
+            ),
+          ),
+        ),
         GetPage(
           name: '/login',
           page: () => LoginScreen(),

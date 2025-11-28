@@ -9,16 +9,21 @@ class RegisterFormController extends GetxController {
   final passwordController = TextEditingController();
   final confirmPasswordController = TextEditingController();
 
-  @override
-  void onClose() {
-    nameController.dispose();
-    emailController.dispose();
-    passwordController.dispose();
-    confirmPasswordController.dispose();
-    super.onClose();
-  }
-
   Future<bool> signUp(String email, String password, String name) async {
     return await authService.register(email, password, name);
+  }
+
+  bool validatePasswords(String pass, String confirmPass) {
+    if (pass != confirmPass) {
+      Get.snackbar(
+        "Password Error",
+        "Password and Confirm Password do not match!",
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+        snackPosition: SnackPosition.BOTTOM,
+      );
+      return false;
+    }
+    return true;
   }
 }

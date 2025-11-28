@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:graduation_project_depi/views/RegisterPgae.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import '../controllers/login_form_controller.dart';
 import '../utils/size_config.dart'; // Import SizeConfig for responsive sizing
 
 class LoginForm extends GetView<LoginFormController> {
-  LoginForm({super.key});
+  const LoginForm({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -148,20 +149,31 @@ class LoginForm extends GetView<LoginFormController> {
   Widget _buildLoginButton(BuildContext context, SizeConfig sizeConfig) {
     return GestureDetector(
       onTap: () async {
-        final success = await controller.login(
-          controller.mailController.text,
-          controller.passwordController.text,
-        );
-
-        if (success) {
-          Get.toNamed('/calculator_page');
-        } else {
-          Get.snackbar(
-            "Login Failed",
-            "Invalid email or password",
-            backgroundColor: Colors.red,
-            colorText: Colors.white,
+        try {
+          final success = await controller.login(
+            controller.mailController.text.trim(),
+            controller.passwordController.text.trim(),
           );
+
+          if (success) {
+            Get.offAllNamed('/calculator_page');
+          }
+        } on AuthApiException catch (e) {
+          if (e.code == 'email_not_confirmed') {
+            Get.snackbar(
+              "Login Failed",
+              "Email not Confirmed",
+              backgroundColor: Colors.red,
+              colorText: Colors.white,
+            );
+          } else if (e.code == 'invalid_credentials') {
+            Get.snackbar(
+              "Login Failed",
+              "Invalid email or password",
+              backgroundColor: Colors.red,
+              colorText: Colors.white,
+            );
+          }
         }
       },
 
