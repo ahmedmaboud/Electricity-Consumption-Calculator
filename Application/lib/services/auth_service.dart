@@ -14,6 +14,9 @@ class AuthService {
       final AuthChangeEvent event = data.event;
       if (event == AuthChangeEvent.passwordRecovery) {
         Get.toNamed('/update_password');
+      } else if (event == AuthChangeEvent.signedIn) {
+        UserSession().loadUserInfo();
+        Get.offAllNamed('/calculator_page');
       }
     });
   }
@@ -23,6 +26,7 @@ class AuthService {
       final authResponse = await cloud.auth.signUp(
         email: email,
         password: password,
+        emailRedirectTo: 'io.supabase.flutter://login-callback',
       );
 
       final authUser = authResponse.user;
