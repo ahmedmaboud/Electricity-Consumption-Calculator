@@ -7,6 +7,7 @@ import 'package:graduation_project_depi/user_session.dart';
 import 'package:graduation_project_depi/views/RegisterPgae.dart';
 import 'package:graduation_project_depi/views/SplashScreen.dart';
 import 'package:graduation_project_depi/views/loginPage.dart';
+import 'package:graduation_project_depi/views/main_shell.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'calculator_page.dart';
@@ -46,8 +47,8 @@ class MyApp extends StatelessWidget {
       getPages: [
         GetPage(name: '/splash_screen', page: () => SplashScreen()),
         GetPage(
-          name: '/calculator_page',
-          page: () => CalculatorPage(),
+          name: '/main_shell',
+          page: () => MainShell(),
           binding: BindingsBuilder(
             () => Get.lazyPut<CalculatorPageController>(
               () => CalculatorPageController(),
@@ -90,6 +91,10 @@ class MyApp extends StatelessWidget {
             () => Get.lazyPut<ProfileController>(() => ProfileController()),
           ),
         ),
+        // GetPage(
+        //   name: '/main_shell',
+        //   page: () => const MainShell(),
+        // ),
       ],
     );
   }

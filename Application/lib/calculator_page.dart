@@ -40,15 +40,7 @@ class CalculatorPage extends GetView<CalculatorPageController> {
               },
             ),
 
-            IconButton(
-              icon: const Icon(
-                Icons.account_circle_outlined,
-                color: Colors.white,
-              ),
-              onPressed: () {
-                Get.toNamed('/profile');
-              },
-            ),
+            
           ],
         ),
         body: Container(

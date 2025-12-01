@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:graduation_project_depi/views/RegisterPgae.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../controllers/login_form_controller.dart';
 import '../utils/size_config.dart'; // Import SizeConfig for responsive sizing
@@ -158,7 +157,7 @@ class LoginForm extends GetView<LoginFormController> {
           );
 
           if (success) {
-            Get.offAllNamed('/calculator_page');
+            Get.offAllNamed('/main_shell');
           }
         } on AuthApiException catch (e) {
           if (e.code == 'email_not_confirmed') {
