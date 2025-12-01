@@ -52,7 +52,9 @@ class LoginForm extends GetView<LoginFormController> {
         Align(
           alignment: Alignment.centerRight,
           child: TextButton(
-            onPressed: () {},
+            onPressed: () {
+              Get.toNamed('forgot_password');
+            },
             child: Text(
               'Forgot Password?',
               style: TextStyle(

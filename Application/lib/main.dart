@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:graduation_project_depi/controllers/calculator_page_controller.dart';
+import 'package:graduation_project_depi/updated_password_screen.dart';
 import 'package:graduation_project_depi/user_session.dart';
 import 'package:graduation_project_depi/views/RegisterPgae.dart';
 import 'package:graduation_project_depi/views/SplashScreen.dart';
@@ -8,8 +9,11 @@ import 'package:graduation_project_depi/views/loginPage.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'calculator_page.dart';
+import 'controllers/forgot_password_controller.dart';
 import 'controllers/login_form_controller.dart';
 import 'controllers/register_form_controller.dart';
+import 'controllers/updated_password_controller.dart';
+import 'forgot_password_screen.dart';
 import 'services/auth_service.dart';
 
 Future<void> main() async {
@@ -61,6 +65,21 @@ class MyApp extends StatelessWidget {
           binding: BindingsBuilder(() {
             Get.lazyPut<RegisterFormController>(() => RegisterFormController());
           }),
+        ),
+
+        GetPage(
+          name: '/forgot_password',
+          page: () => const ForgotPasswordScreen(),
+          binding: BindingsBuilder(
+            () => Get.lazyPut(() => ForgotPasswordController()),
+          ),
+        ),
+        GetPage(
+          name: '/update_password',
+          page: () => const UpdatePasswordScreen(),
+          binding: BindingsBuilder(
+            () => Get.lazyPut(() => UpdatePasswordController()),
+          ),
         ),
       ],
     );

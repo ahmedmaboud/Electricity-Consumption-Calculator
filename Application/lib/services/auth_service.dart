@@ -1,9 +1,23 @@
 import 'package:get/get.dart';
-import 'package:graduation_project_depi/user_session.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import '../user_session.dart';
 
 class AuthService {
   final cloud = Get.find<SupabaseClient>();
+
+  AuthService() {
+    _setupAuthListener();
+  }
+
+  void _setupAuthListener() {
+    cloud.auth.onAuthStateChange.listen((data) {
+      final AuthChangeEvent event = data.event;
+      if (event == AuthChangeEvent.passwordRecovery) {
+        Get.toNamed('/update_password');
+      }
+    });
+  }
+
   Future<bool> register(String email, String password, String name) async {
     try {
       final authResponse = await cloud.auth.signUp(
@@ -14,14 +28,12 @@ class AuthService {
       final authUser = authResponse.user;
       if (authUser == null) return false;
 
-      // Insert into your custom profile table
       await cloud.from('user_profile').insert({
         'auth_id': authUser.id,
         'name': name,
       });
 
       await UserSession().loadUserInfo();
-
       return true;
     } catch (e) {
       print('Register error: $e');
@@ -35,15 +47,9 @@ class AuthService {
         email: mail,
         password: password,
       );
-
       if (response.user == null) return false;
-
       await UserSession().loadUserInfo();
-
-      print('User logged in: ${UserSession().currentUser?.email}');
       return true;
-    } on AuthRetryableFetchException {
-      rethrow;
     } catch (e) {
       print("LOGIN ERROR: $e");
       rethrow;
@@ -59,6 +65,17 @@ class AuthService {
       print(e);
       return false;
     }
+  }
+
+  Future<void> sendPasswordResetEmail(String email) async {
+    await cloud.auth.resetPasswordForEmail(
+      email,
+      redirectTo: 'io.supabase.flutter://reset-callback',
+    );
+  }
+
+  Future<void> updateUserPassword(String newPassword) async {
+    await cloud.auth.updateUser(UserAttributes(password: newPassword));
   }
 
   bool isLogin() => cloud.auth.currentSession != null;
