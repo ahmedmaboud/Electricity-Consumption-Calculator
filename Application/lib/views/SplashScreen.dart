@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:graduation_project_depi/views/loginPage.dart';
@@ -31,24 +32,43 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // Use a clean background color that matches your theme
       backgroundColor: const Color(0xFFF5F5F5),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            // Your Photo/Icon goes here
-            Image.asset(
-              "assets/photos/icons8-lightning-bolt-100.png",
-              scale: 2,
+      body: Stack(
+        children: [
+          Align(
+            alignment: Alignment.centerRight,
+            child: SizedBox(
+              width: MediaQuery.of(context).size.width / 2,
+              height: double.infinity,
+              child: Container(
+                color: Colors.blue[700],
+              ),
             ),
-            const SizedBox(height: 24),
-            // A loading indicator to show that the app is preparing
-            CircularProgressIndicator(
-              valueColor: AlwaysStoppedAnimation<Color>(Colors.blue.shade700),
-            ),
-          ],
-        ),
+          ),
+          Center(
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(16),
+                child: BackdropFilter(
+                  filter: ImageFilter.blur(sigmaX: 60, sigmaY: 60),
+                  child: Container(
+                    width: 100,
+                    height: 100,
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.15),
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: Center(
+                      child: Icon(
+                        Icons.bolt,
+                        color: Colors.blue[700],
+                        size: 80,
+                      ),
+                    ),
+                  ),
+                ),
+              )
+          ),
+        ],
       ),
     );
   }
