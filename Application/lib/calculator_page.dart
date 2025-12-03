@@ -39,6 +39,8 @@ class CalculatorPage extends GetView<CalculatorPageController> {
                 );
               },
             ),
+
+            
           ],
         ),
         body: Container(
