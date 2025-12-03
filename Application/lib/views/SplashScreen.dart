@@ -49,7 +49,7 @@ class _SplashScreenState extends State<SplashScreen> {
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(16),
                 child: BackdropFilter(
-                  filter: ImageFilter.blur(sigmaX: 65, sigmaY: 65),
+                  filter: ImageFilter.blur(sigmaX: 60, sigmaY: 60),
                   child: Container(
                     width: 100,
                     height: 100,
