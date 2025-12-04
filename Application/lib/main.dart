@@ -12,6 +12,7 @@ import 'package:graduation_project_depi/views/loginPage.dart';
 import 'package:graduation_project_depi/views/main_shell.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'controllers/forgot_password_controller.dart';
+import 'controllers/history_controller.dart';
 import 'controllers/login_form_controller.dart';
 import 'controllers/profile_controller.dart';
 import 'controllers/register_form_controller.dart';
@@ -59,6 +60,7 @@ class MyApp extends StatelessWidget {
               () => CalculatorPageController(),
             );
             Get.lazyPut<ProfileController>(() => ProfileController());
+            Get.lazyPut<HistoryController>(() => HistoryController());
           }),
         ),
         GetPage(

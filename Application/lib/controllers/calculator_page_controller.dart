@@ -7,6 +7,8 @@ import 'package:graduation_project_depi/entities/reading.dart';
 import 'package:graduation_project_depi/services/electricity_reading_service.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import 'history_controller.dart';
+
 class CalculatorPageController extends GetxController {
   // Services
   final _readingService = Get.find<ElectricityReadingService>();
@@ -126,8 +128,9 @@ class CalculatorPageController extends GetxController {
     final newReading = Reading(
       userId: userId,
       meterValue: current,
-      cost: totalCost.toInt(),
+      cost: totalCost,
       sourceType: SourceType.manual,
+      createdAt: DateTime.now(), // Ensure we have a date for local update
     );
 
     bool success = await _readingService.insertReading(newReading);
@@ -139,6 +142,10 @@ class CalculatorPageController extends GetxController {
         backgroundColor: Colors.green,
         colorText: Colors.white,
       );
+      if (Get.isRegistered<HistoryController>()) {
+        Get.find<HistoryController>().addLocalReading(newReading, consum);
+      }
+
       lastDbReading.value = current;
       currentReadingController.clear();
     } else {

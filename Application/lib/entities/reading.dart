@@ -26,7 +26,7 @@ class Reading {
   final DateTime? createdAt;
   final String userId;
   final int meterValue;
-  final int? cost;
+  final double? cost;
   final SourceType sourceType;
 
   Reading({
@@ -43,7 +43,7 @@ class Reading {
     createdAt: DateTime.parse(json["created_at"]),
     userId: json["user_id"],
     meterValue: json["meter_value"],
-    cost: json["cost"],
+    cost: (json["cost"] as num?)?.toDouble(),
     sourceType: sourceTypeFromString(json["source_type"]),
   );
 
