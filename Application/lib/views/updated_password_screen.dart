@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'controllers/updated_password_controller.dart';
+import '../controllers/updated_password_controller.dart';
 
 class UpdatePasswordScreen extends GetView<UpdatePasswordController> {
   const UpdatePasswordScreen({super.key});

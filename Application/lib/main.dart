@@ -1,22 +1,22 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:graduation_project_depi/controllers/calculator_page_controller.dart';
-import 'package:graduation_project_depi/profile_screen.dart';
-import 'package:graduation_project_depi/updated_password_screen.dart';
+import 'package:graduation_project_depi/services/electricity_reading_service.dart';
+import 'package:graduation_project_depi/views/profile_screen.dart';
+import 'package:graduation_project_depi/views/updated_password_screen.dart';
 import 'package:graduation_project_depi/user_session.dart';
 import 'package:graduation_project_depi/views/RegisterPgae.dart';
 import 'package:graduation_project_depi/views/SplashScreen.dart';
 import 'package:graduation_project_depi/views/loginPage.dart';
 import 'package:graduation_project_depi/views/main_shell.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-
-import 'calculator_page.dart';
 import 'controllers/forgot_password_controller.dart';
 import 'controllers/login_form_controller.dart';
 import 'controllers/profile_controller.dart';
 import 'controllers/register_form_controller.dart';
 import 'controllers/updated_password_controller.dart';
-import 'forgot_password_screen.dart';
+import 'views/forgot_password_screen.dart';
 import 'services/auth_service.dart';
 
 Future<void> main() async {
@@ -28,6 +28,10 @@ Future<void> main() async {
   );
 
   await UserSession().loadUserInfo();
+  await SystemChrome.setPreferredOrientations([
+    DeviceOrientation.portraitDown,
+    DeviceOrientation.portraitUp,
+  ]);
   runApp(const MyApp());
 }
 
@@ -40,6 +44,7 @@ class MyApp extends StatelessWidget {
       initialBinding: BindingsBuilder(() {
         Get.put<SupabaseClient>(Supabase.instance.client);
         Get.put<AuthService>(AuthService());
+        Get.put<ElectricityReadingService>(ElectricityReadingService());
       }),
       debugShowCheckedModeBanner: false,
       initialRoute: '/splash_screen',
@@ -49,11 +54,12 @@ class MyApp extends StatelessWidget {
         GetPage(
           name: '/main_shell',
           page: () => MainShell(),
-          binding: BindingsBuilder(
-            () => Get.lazyPut<CalculatorPageController>(
+          binding: BindingsBuilder(() {
+            Get.lazyPut<CalculatorPageController>(
               () => CalculatorPageController(),
-            ),
-          ),
+            );
+            Get.lazyPut<ProfileController>(() => ProfileController());
+          }),
         ),
         GetPage(
           name: '/login',

@@ -16,7 +16,7 @@ class AuthService {
         Get.toNamed('/update_password');
       } else if (event == AuthChangeEvent.signedIn) {
         UserSession().loadUserInfo();
-        Get.offAllNamed('/calculator_page');
+        Get.offAllNamed('/main_shell');
       }
     });
   }

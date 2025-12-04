@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 // Import your pages
-import 'package:graduation_project_depi/calculator_page.dart';
-import 'package:graduation_project_depi/profile_screen.dart';
+import 'package:graduation_project_depi/views/calculator_page.dart';
+import 'package:graduation_project_depi/views/profile_screen.dart';
 import 'package:graduation_project_depi/views/analytics_page.dart' as analytics_placeholder;
 import 'package:graduation_project_depi/views/history_page.dart' as history_placeholder;
 

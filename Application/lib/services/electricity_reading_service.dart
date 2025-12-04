@@ -33,6 +33,24 @@ class ElectricityReadingService {
     }
   }
 
+  Future<Reading?> getLatestReading(String userId) async {
+    try {
+      final response = await cloud
+          .from(_tableName)
+          .select()
+          .eq('user_id', userId)
+          .order('created_at', ascending: false)
+          .limit(1)
+          .maybeSingle(); // Returns null if no records exist
+
+      if (response == null) return null;
+      return readingFromJson(json.encode(response));
+    } catch (e) {
+      print('Get Latest Reading Error: $e');
+      return null;
+    }
+  }
+
   Future<List<Reading>> getUserReadings(String userId) async {
     try {
       final response = await cloud

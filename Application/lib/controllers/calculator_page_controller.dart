@@ -1,19 +1,45 @@
 import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_mlkit_text_recognition/google_mlkit_text_recognition.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:graduation_project_depi/entities/reading.dart';
+import 'package:graduation_project_depi/services/electricity_reading_service.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class CalculatorPageController extends GetxController {
-  final previousReadingController = TextEditingController();
+  // Services
+  final _readingService = Get.find<ElectricityReadingService>();
+  final _supabase = Get.find<SupabaseClient>();
+
+  // UI Controllers
   final currentReadingController = TextEditingController();
+
+  // Observables
   final cost = ''.obs;
   final consumption = ''.obs;
-
   final isLoading = false.obs;
+  final lastDbReading = Rxn<int>();
 
   final picker = ImagePicker();
+
+  @override
+  void onInit() {
+    super.onInit();
+    fetchLastReading();
+  }
+
+  void fetchLastReading() async {
+    final userId = _supabase.auth.currentUser?.id;
+    if (userId != null) {
+      final reading = await _readingService.getLatestReading(userId);
+      if (reading != null) {
+        lastDbReading.value = reading.meterValue;
+      } else {
+        lastDbReading.value = 0;
+      }
+    }
+  }
 
   double calculateElectricity(int current, int previous) {
     final reading = current - previous;
@@ -47,69 +73,84 @@ class CalculatorPageController extends GetxController {
   }
 
   bool validateInputs() {
-    if (previousReadingController.text.isEmpty ||
-        currentReadingController.text.isEmpty) {
-      Get.snackbar(
-        'Missing Data',
-        'Please fill in both readings!',
-        backgroundColor: Colors.red.shade400,
-        colorText: Colors.white,
-        snackPosition: SnackPosition.BOTTOM,
-      );
+    if (currentReadingController.text.isEmpty) {
+      Get.snackbar('Missing Data', 'Please enter the current reading!');
       return false;
     }
 
-    final previous = int.tryParse(previousReadingController.text);
     final current = int.tryParse(currentReadingController.text);
+    final previous = lastDbReading.value ?? 0;
 
-    if (previous == null || current == null) {
-      Get.snackbar(
-        'Invalid Input',
-        'Please enter valid numbers!',
-        backgroundColor: Colors.orange.shade400,
-        colorText: Colors.white,
-        snackPosition: SnackPosition.BOTTOM,
-      );
-      currentReadingController.clear();
-      previousReadingController.clear();
+    if (current == null) {
+      Get.snackbar('Invalid Input', 'Please enter a valid number!');
       return false;
     }
 
     if (current < previous) {
       Get.snackbar(
         'Error',
-        'Current reading cannot be less than previous reading!',
-        backgroundColor: Colors.red.shade400,
+        'Current reading ($current) cannot be less than previous reading ($previous)!',
+        backgroundColor: Colors.red,
         colorText: Colors.white,
-        snackPosition: SnackPosition.BOTTOM,
       );
-      currentReadingController.clear();
-      previousReadingController.clear();
       return false;
     }
-
     return true;
   }
 
-  void calculate() {
+  Future<void> calculate() async {
     if (!validateInputs()) return;
 
-    final previous = int.parse(previousReadingController.text);
-    final current = int.parse(currentReadingController.text);
-    final consum = current - previous;
-    final total = calculateElectricity(current, previous);
-    cost.value = 'Your Total Bill: ${total.toStringAsFixed(2)} EGP';
-    consumption.value = 'Your consumption: ${consum.toStringAsFixed(0)} kWh';
+    final userId = _supabase.auth.currentUser?.id;
+    if (userId == null) {
+      Get.snackbar(
+        'Error',
+        'User not logged in.',
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
+      return;
+    }
 
-    Get.snackbar(
-      'Success',
-      'Electricity bill calculated successfully!',
-      backgroundColor: Colors.green.shade400,
-      colorText: Colors.white,
-      snackPosition: SnackPosition.BOTTOM,
+    isLoading.value = true;
+
+    final current = int.parse(currentReadingController.text);
+    final previous = lastDbReading.value ?? 0;
+
+    final consum = current - previous;
+    final totalCost = calculateElectricity(current, previous);
+
+    cost.value = 'Total Bill: ${totalCost.toStringAsFixed(2)} EGP';
+    consumption.value = 'Consumption: ${consum.toStringAsFixed(0)} kWh';
+
+    final newReading = Reading(
+      userId: userId,
+      meterValue: current,
+      cost: totalCost.toInt(),
+      sourceType: SourceType.manual,
     );
-    currentReadingController.clear();
-    previousReadingController.clear();
+
+    bool success = await _readingService.insertReading(newReading);
+
+    if (success) {
+      Get.snackbar(
+        'Success',
+        'Saved successfully!',
+        backgroundColor: Colors.green,
+        colorText: Colors.white,
+      );
+      lastDbReading.value = current;
+      currentReadingController.clear();
+    } else {
+      Get.snackbar(
+        'Error',
+        'Failed to save.',
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
+    }
+
+    isLoading.value = false;
   }
 
   Future<void> scanForField(
@@ -118,28 +159,53 @@ class CalculatorPageController extends GetxController {
   ) async {
     showModalBottomSheet(
       context: context,
-      elevation: 10,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
       builder: (_) {
         return SafeArea(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
+              const SizedBox(height: 10),
+              Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: Colors.grey[300],
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              const SizedBox(height: 20),
               ListTile(
-                leading: Icon(Icons.camera_alt),
-                title: Text("Take Photo"),
+                leading: const CircleAvatar(
+                  backgroundColor: Color(0xFFE3F2FD),
+                  child: Icon(Icons.camera_alt, color: Color(0xFF1565C0)),
+                ),
+                title: const Text(
+                  "Take Photo",
+                  style: TextStyle(fontWeight: FontWeight.w600),
+                ),
                 onTap: () async {
                   Navigator.pop(context);
                   await runOCR(target, ImageSource.camera);
                 },
               ),
               ListTile(
-                leading: Icon(Icons.photo_library),
-                title: Text("Choose from Gallery"),
+                leading: const CircleAvatar(
+                  backgroundColor: Color(0xFFE3F2FD),
+                  child: Icon(Icons.photo_library, color: Color(0xFF1565C0)),
+                ),
+                title: const Text(
+                  "Choose from Gallery",
+                  style: TextStyle(fontWeight: FontWeight.w600),
+                ),
                 onTap: () async {
                   Navigator.pop(context);
                   await runOCR(target, ImageSource.gallery);
                 },
               ),
+              const SizedBox(height: 20),
             ],
           ),
         );
@@ -148,36 +214,54 @@ class CalculatorPageController extends GetxController {
   }
 
   Future<void> runOCR(TextEditingController target, ImageSource source) async {
-    final picked = await picker.pickImage(source: source);
-    if (picked == null) return;
+    try {
+      final picked = await picker.pickImage(source: source);
+      if (picked == null) return;
 
-    isLoading.value = true;
+      isLoading.value = true;
+      final inputImage = InputImage.fromFile(File(picked.path));
+      final recognizer = TextRecognizer(script: TextRecognitionScript.latin);
+      final result = await recognizer.processImage(inputImage);
 
-    final inputImage = InputImage.fromFile(File(picked.path));
-    final recognizer = TextRecognizer(script: TextRecognitionScript.latin);
-    final result = await recognizer.processImage(inputImage);
-
-    List<int> numbers = [];
-
-    for (var block in result.blocks) {
-      for (var line in block.lines) {
-        for (var m in RegExp(r'\d+').allMatches(line.text)) {
-          numbers.add(int.parse(m.group(0)!));
+      List<int> numbers = [];
+      for (var block in result.blocks) {
+        for (var line in block.lines) {
+          // Improved Regex to catch distinct numbers better
+          for (var m in RegExp(r'\d+').allMatches(line.text)) {
+            numbers.add(int.parse(m.group(0)!));
+          }
         }
       }
+      await recognizer.close();
+      isLoading.value = false;
+
+      if (numbers.isEmpty) {
+        Get.snackbar(
+          "Error",
+          "No numbers found in image!",
+          backgroundColor: Colors.orange,
+          colorText: Colors.white,
+        );
+        return;
+      }
+
+      numbers.sort();
+      // Assuming the meter reading is often the largest number on the display
+      target.text = numbers.last.toString();
+      Get.snackbar(
+        "Done",
+        "Number extracted: ${numbers.last}",
+        backgroundColor: Colors.green,
+        colorText: Colors.white,
+      );
+    } catch (e) {
+      isLoading.value = false;
+      Get.snackbar(
+        "Error",
+        "Failed to scan image: $e",
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
     }
-
-    await recognizer.close();
-    isLoading.value = false;
-
-    if (numbers.isEmpty) {
-      Get.snackbar("Error", "No numbers found in image!");
-      return;
-    }
-
-    numbers.sort();
-    target.text = numbers.last.toString(); // Take largest reading
-
-    Get.snackbar("Done", "Number extracted successfully!");
   }
 }
