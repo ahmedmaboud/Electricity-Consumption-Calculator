@@ -1,16 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:graduation_project_depi/controllers/analytics_page_controller.dart';
+import 'package:graduation_project_depi/views/analytics_page.dart';
 
-// Import your pages
+// Pages
 import 'package:graduation_project_depi/views/calculator_page.dart';
+import 'package:graduation_project_depi/views/history_page.dart';
 import 'package:graduation_project_depi/views/profile_screen.dart';
-import 'package:graduation_project_depi/views/analytics_page.dart'
-    as analytics_placeholder;
-import 'package:graduation_project_depi/views/history_page.dart'
-    as history_placeholder;
 
-// Import your controllers
+
+// Controllers
 import 'package:graduation_project_depi/controllers/profile_controller.dart';
+import 'package:graduation_project_depi/controllers/calculator_page_controller.dart';
+
 
 class MainShell extends StatefulWidget {
   final int initialIndex;
@@ -22,14 +24,7 @@ class MainShell extends StatefulWidget {
 
 class _MainShellState extends State<MainShell> {
   late int _selectedIndex;
-
-  // Register pages. Keep real widgets here.
-  late final List<Widget> _pages = [
-    const CalculatorPage(),
-    history_placeholder.HistoryPage(),
-    analytics_placeholder.AnalyticsPage(),
-    const ProfileScreen(),
-  ];
+  late final List<Widget> _pages; // initialized in initState
 
   @override
   void initState() {
@@ -38,10 +33,29 @@ class _MainShellState extends State<MainShell> {
     // Set initial index
     _selectedIndex = widget.initialIndex;
 
-    // Register ProfileController
+    // Register controllers in the correct order:
+    // 1) Calculator first (producer of readings)
+    if (!Get.isRegistered<CalculatorPageController>()) {
+      Get.put(CalculatorPageController());
+    }
+
+    // 2) Analytics second (consumes calculator data)
+    if (!Get.isRegistered<AnalyticsController>()) {
+      Get.put(AnalyticsController());
+    }
+
+    // 3) Profile (or others)
     if (!Get.isRegistered<ProfileController>()) {
       Get.put(ProfileController());
     }
+
+    // Now it's safe to create pages that may call Get.find in their field initializers.
+    _pages = <Widget>[
+      const CalculatorPage(),               // index 0
+      HistoryPage(),    // index 1
+      AnalyticsView(),       // index 2  <-- added Analytics page here
+      const ProfileScreen(),                // index 3
+    ];
   }
 
   void _onItemTapped(int index) => setState(() => _selectedIndex = index);
@@ -49,26 +63,16 @@ class _MainShellState extends State<MainShell> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // Use IndexedStack to preserve state of each tab
       body: IndexedStack(index: _selectedIndex, children: _pages),
 
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
           color: Colors.white,
-          boxShadow: [
-            BoxShadow(
-              blurRadius: 12,
-              color: Colors.black12,
-              offset: Offset(0, -3),
-            ),
-          ],
+          boxShadow: [BoxShadow(blurRadius: 12, color: Colors.black12, offset: Offset(0, -3))],
         ),
         child: SafeArea(
           child: ClipRRect(
-            borderRadius: BorderRadius.only(
-              topLeft: Radius.circular(20),
-              topRight: Radius.circular(20),
-            ),
+            borderRadius: BorderRadius.only(topLeft: Radius.circular(20), topRight: Radius.circular(20)),
             child: BottomNavigationBar(
               currentIndex: _selectedIndex,
               onTap: _onItemTapped,
@@ -77,24 +81,10 @@ class _MainShellState extends State<MainShell> {
               unselectedItemColor: Colors.grey,
               showUnselectedLabels: true,
               items: const [
-                BottomNavigationBarItem(
-                  icon: Icon(Icons.home_outlined),
-                  activeIcon: Icon(Icons.home),
-                  label: 'Home',
-                ),
-                BottomNavigationBarItem(
-                  icon: Icon(Icons.history),
-                  label: 'History',
-                ),
-                BottomNavigationBarItem(
-                  icon: Icon(Icons.bar_chart),
-                  label: 'Analytics',
-                ),
-                BottomNavigationBarItem(
-                  icon: Icon(Icons.person_outline),
-                  activeIcon: Icon(Icons.person),
-                  label: 'Profile',
-                ),
+                BottomNavigationBarItem(icon: Icon(Icons.home_outlined), activeIcon: Icon(Icons.home), label: 'Home'),
+                BottomNavigationBarItem(icon: Icon(Icons.history), label: 'History'),
+                BottomNavigationBarItem(icon: Icon(Icons.bar_chart), label: 'Analytics'),
+                BottomNavigationBarItem(icon: Icon(Icons.person_outline), activeIcon: Icon(Icons.person), label: 'Profile'),
               ],
             ),
           ),

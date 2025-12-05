@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:graduation_project_depi/controllers/analytics_page_controller.dart';
 import 'package:graduation_project_depi/controllers/calculator_page_controller.dart';
 import 'package:graduation_project_depi/services/electricity_reading_service.dart';
+import 'package:graduation_project_depi/views/analytics_page.dart';
 import 'package:graduation_project_depi/views/profile_screen.dart';
 import 'package:graduation_project_depi/views/updated_password_screen.dart';
 import 'package:graduation_project_depi/user_session.dart';
@@ -53,16 +55,15 @@ class MyApp extends StatelessWidget {
       getPages: [
         GetPage(name: '/splash_screen', page: () => SplashScreen()),
         GetPage(
-          name: '/main_shell',
-          page: () => MainShell(),
-          binding: BindingsBuilder(() {
-            Get.lazyPut<CalculatorPageController>(
-              () => CalculatorPageController(),
-            );
-            Get.lazyPut<ProfileController>(() => ProfileController());
-            Get.lazyPut<HistoryController>(() => HistoryController());
-          }),
-        ),
+            name: '/main_shell',
+            page: () => MainShell(),
+            binding: BindingsBuilder(() {
+              Get.lazyPut<CalculatorPageController>(() => CalculatorPageController());
+              Get.lazyPut<ProfileController>(() => ProfileController());
+              Get.lazyPut<HistoryController>(() => HistoryController());
+              Get.lazyPut<AnalyticsController>(() => AnalyticsController());
+            }),
+          ),
         GetPage(
           name: '/login',
           page: () => LoginScreen(),
@@ -99,10 +100,7 @@ class MyApp extends StatelessWidget {
             () => Get.lazyPut<ProfileController>(() => ProfileController()),
           ),
         ),
-        // GetPage(
-        //   name: '/main_shell',
-        //   page: () => const MainShell(),
-        // ),
+        
       ],
     );
   }

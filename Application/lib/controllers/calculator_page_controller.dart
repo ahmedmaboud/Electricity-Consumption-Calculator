@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_mlkit_text_recognition/google_mlkit_text_recognition.dart';
+import 'package:graduation_project_depi/controllers/analytics_page_controller.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:graduation_project_depi/entities/reading.dart';
 import 'package:graduation_project_depi/services/electricity_reading_service.dart';
@@ -145,6 +146,14 @@ class CalculatorPageController extends GetxController {
       if (Get.isRegistered<HistoryController>()) {
         Get.find<HistoryController>().addLocalReading(newReading, consum);
       }
+            final double kwhDouble = consum.toDouble();
+        final DateTime timestamp = newReading.createdAt ?? DateTime.now();
+        try {
+          final analytics = Get.find<AnalyticsController>();
+          analytics.updateFromConsumption(kwhDouble, totalCost, timestamp);
+        } catch (e) {
+          debugPrint('AnalyticsController not available: $e');
+        }
 
       lastDbReading.value = current;
       currentReadingController.clear();
