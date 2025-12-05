@@ -123,4 +123,14 @@ class ElectricityReadingService {
       return false;
     }
   }
+
+  Future<bool> deleteAllReadings(String userId) async {
+    try {
+      await cloud.from(_tableName).delete().eq('user_id', userId);
+      return true;
+    } catch (e) {
+      print('Delete All Error: $e');
+      return false;
+    }
+  }
 }
