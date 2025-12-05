@@ -28,6 +28,14 @@ class HistoryPage extends GetView<HistoryController> {
         centerTitle: true,
         backgroundColor: Colors.transparent,
         elevation: 0,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.delete_outline, color: Colors.red),
+            tooltip: "Reset History",
+            onPressed: () => _showDeleteConfirmation(context),
+          ),
+          const SizedBox(width: 10),
+        ],
       ),
       body: Obx(() {
         if (controller.isLoading.value) {
@@ -154,7 +162,7 @@ class HistoryPage extends GetView<HistoryController> {
                   child: controller.historyItems.isEmpty
                       ? Center(
                           child: Text(
-                            "No records found for this period.",
+                            "No readings found for this period.",
                             style: TextStyle(color: Colors.grey[400]),
                           ),
                         )
@@ -173,6 +181,34 @@ class HistoryPage extends GetView<HistoryController> {
           ),
         );
       }),
+    );
+  }
+
+  void _showDeleteConfirmation(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text("Reset History"),
+        content: const Text(
+          "Are you sure you want to delete ALL reading history? This action cannot be undone.",
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Get.back(),
+            child: const Text("Cancel", style: TextStyle(color: Colors.black)),
+          ),
+          TextButton(
+            onPressed: () {
+              Get.back();
+              controller.clearHistory();
+            },
+            child: const Text(
+              "Delete All",
+              style: TextStyle(color: Colors.red),
+            ),
+          ),
+        ],
+      ),
     );
   }
 

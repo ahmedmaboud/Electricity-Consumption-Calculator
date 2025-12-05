@@ -5,6 +5,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../entities/history_item.dart';
 import '../entities/reading.dart';
+import 'calculator_page_controller.dart';
 
 class HistoryController extends GetxController {
   final _readingService = Get.find<ElectricityReadingService>();
@@ -102,7 +103,7 @@ class HistoryController extends GetxController {
     List<HistoryItem> temp = List.from(_allItems);
     final now = DateTime.now();
 
-    // A. Filter by Tab (Week/Month/Year)
+    // A. Filter by Tab (Month/Year)
     if (selectedDateRange.value != null) {
       // If custom date range is selected, ignore tabs
       temp = temp
@@ -115,10 +116,7 @@ class HistoryController extends GetxController {
           )
           .toList();
     } else {
-      // Standard Tab Logic
-      if (selectedTab.value == 'Week') {
-        temp = temp.where((i) => now.difference(i.date).inDays <= 7).toList();
-      } else if (selectedTab.value == 'Month') {
+      if (selectedTab.value == 'Month') {
         temp = temp.where((i) => now.difference(i.date).inDays <= 30).toList();
       } else if (selectedTab.value == 'Year') {
         temp = temp.where((i) => now.difference(i.date).inDays <= 365).toList();
@@ -194,5 +192,35 @@ class HistoryController extends GetxController {
     _allItems.add(newItem);
 
     applyFilters();
+  }
+
+  Future<void> clearHistory() async {
+    final userId = _supabase.auth.currentUser?.id;
+    if (userId == null) return;
+
+    isLoading.value = true;
+    final success = await _readingService.deleteAllReadings(userId);
+
+    if (success) {
+      _allItems.clear();
+      applyFilters(); // Updates UI to empty
+
+      Get.find<CalculatorPageController>().lastDbReading.value = 0;
+
+      Get.snackbar(
+        "Success",
+        "All history cleared successfully",
+        backgroundColor: Colors.green,
+        colorText: Colors.white,
+      );
+    } else {
+      Get.snackbar(
+        "Error",
+        "Failed to clear history",
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
+    }
+    isLoading.value = false;
   }
 }
