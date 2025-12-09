@@ -95,7 +95,7 @@ class HistoryPage extends GetView<HistoryController> {
                           ),
                           const Spacer(),
                           Text(
-                            "${controller.totalCost.value} EGP",
+                            "${controller.totalCost.value.toStringAsFixed(2)} EGP",
                             style: const TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.bold,
@@ -315,7 +315,7 @@ class HistoryPage extends GetView<HistoryController> {
             ),
           ),
           Text(
-            "${item.cost} EGP",
+            "${item.cost.toStringAsFixed(2)} EGP",
             style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
           ),
         ],

@@ -8,11 +8,10 @@ import 'package:graduation_project_depi/views/calculator_page.dart';
 import 'package:graduation_project_depi/views/history_page.dart';
 import 'package:graduation_project_depi/views/profile_screen.dart';
 
-
 // Controllers
 import 'package:graduation_project_depi/controllers/profile_controller.dart';
 import 'package:graduation_project_depi/controllers/calculator_page_controller.dart';
-
+import 'package:graduation_project_depi/controllers/budget_controller.dart'; // Import BudgetController
 
 class MainShell extends StatefulWidget {
   final int initialIndex;
@@ -24,37 +23,41 @@ class MainShell extends StatefulWidget {
 
 class _MainShellState extends State<MainShell> {
   late int _selectedIndex;
-  late final List<Widget> _pages; // initialized in initState
+  late final List<Widget> _pages;
 
   @override
   void initState() {
     super.initState();
 
-    // Set initial index
     _selectedIndex = widget.initialIndex;
 
-    // Register controllers in the correct order:
-    // 1) Calculator first (producer of readings)
+    // --- REGISTER CONTROLLERS ---
+
+    // 1. Budget 
+    if (!Get.isRegistered<BudgetController>()) {
+      Get.put(BudgetController());
+    }
+
+    // 2. Calculator 
     if (!Get.isRegistered<CalculatorPageController>()) {
       Get.put(CalculatorPageController());
     }
 
-    // 2) Analytics second (consumes calculator data)
+    // 3. Analytics 
     if (!Get.isRegistered<AnalyticsController>()) {
       Get.put(AnalyticsController());
     }
 
-    // 3) Profile (or others)
+    // 4. Profile 
     if (!Get.isRegistered<ProfileController>()) {
       Get.put(ProfileController());
     }
 
-    // Now it's safe to create pages that may call Get.find in their field initializers.
     _pages = <Widget>[
-      const CalculatorPage(),               // index 0
-      HistoryPage(),    // index 1
-      AnalyticsView(),       // index 2  <-- added Analytics page here
-      const ProfileScreen(),                // index 3
+      const CalculatorPage(), // index 0
+      const HistoryPage(),    // index 1
+      AnalyticsView(),        // index 2 
+      const ProfileScreen(),  // index 3
     ];
   }
 
@@ -64,7 +67,6 @@ class _MainShellState extends State<MainShell> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: IndexedStack(index: _selectedIndex, children: _pages),
-
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
           color: Colors.white,

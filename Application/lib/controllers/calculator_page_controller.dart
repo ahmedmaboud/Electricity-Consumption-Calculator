@@ -9,16 +9,14 @@ import 'package:graduation_project_depi/services/electricity_reading_service.dar
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'history_controller.dart';
+import 'budget_controller.dart'; // Import BudgetController
 
 class CalculatorPageController extends GetxController {
-  // Services
   final _readingService = Get.find<ElectricityReadingService>();
   final _supabase = Get.find<SupabaseClient>();
 
-  // UI Controllers
   final currentReadingController = TextEditingController();
 
-  // Observables
   final cost = ''.obs;
   final consumption = ''.obs;
   final isLoading = false.obs;
@@ -80,7 +78,6 @@ class CalculatorPageController extends GetxController {
       Get.snackbar('Missing Data', 'Please enter the current reading!');
       return false;
     }
-
     final current = int.tryParse(currentReadingController.text);
     final previous = lastDbReading.value ?? 0;
 
@@ -88,11 +85,10 @@ class CalculatorPageController extends GetxController {
       Get.snackbar('Invalid Input', 'Please enter a valid number!');
       return false;
     }
-
     if (current < previous) {
       Get.snackbar(
         'Error',
-        'Current reading ($current) cannot be less than previous reading ($previous)!',
+        'Current reading cannot be less than previous reading!',
         backgroundColor: Colors.red,
         colorText: Colors.white,
       );
@@ -126,12 +122,16 @@ class CalculatorPageController extends GetxController {
     cost.value = 'Total Bill: ${totalCost.toStringAsFixed(2)} EGP';
     consumption.value = 'Consumption: ${consum.toStringAsFixed(0)} kWh';
 
+    if (Get.isRegistered<BudgetController>()) {
+      Get.find<BudgetController>().checkBudgetStatus(totalCost);
+    }
+
     final newReading = Reading(
       userId: userId,
       meterValue: current,
       cost: totalCost,
       sourceType: SourceType.manual,
-      createdAt: DateTime.now(), // Ensure we have a date for local update
+      createdAt: DateTime.now(),
     );
 
     bool success = await _readingService.insertReading(newReading);
@@ -143,17 +143,24 @@ class CalculatorPageController extends GetxController {
         backgroundColor: Colors.green,
         colorText: Colors.white,
       );
+
       if (Get.isRegistered<HistoryController>()) {
         Get.find<HistoryController>().addLocalReading(newReading, consum);
       }
-            final double kwhDouble = consum.toDouble();
-        final DateTime timestamp = newReading.createdAt ?? DateTime.now();
-        try {
-          final analytics = Get.find<AnalyticsController>();
-          analytics.updateFromConsumption(kwhDouble, totalCost, timestamp);
-        } catch (e) {
-          debugPrint('AnalyticsController not available: $e');
+
+      final double kwhDouble = consum.toDouble();
+      final DateTime timestamp = newReading.createdAt ?? DateTime.now();
+      try {
+        if (Get.isRegistered<AnalyticsController>()) {
+          Get.find<AnalyticsController>().updateFromConsumption(
+            kwhDouble,
+            totalCost,
+            timestamp,
+          );
         }
+      } catch (e) {
+        debugPrint('Analytics error: $e');
+      }
 
       lastDbReading.value = current;
       currentReadingController.clear();
@@ -233,16 +240,13 @@ class CalculatorPageController extends GetxController {
     try {
       final picked = await picker.pickImage(source: source);
       if (picked == null) return;
-
       isLoading.value = true;
       final inputImage = InputImage.fromFile(File(picked.path));
       final recognizer = TextRecognizer(script: TextRecognitionScript.latin);
       final result = await recognizer.processImage(inputImage);
-
       List<int> numbers = [];
       for (var block in result.blocks) {
         for (var line in block.lines) {
-          // Improved Regex to catch distinct numbers better
           for (var m in RegExp(r'\d+').allMatches(line.text)) {
             numbers.add(int.parse(m.group(0)!));
           }
@@ -250,7 +254,6 @@ class CalculatorPageController extends GetxController {
       }
       await recognizer.close();
       isLoading.value = false;
-
       if (numbers.isEmpty) {
         Get.snackbar(
           "Error",
@@ -260,9 +263,7 @@ class CalculatorPageController extends GetxController {
         );
         return;
       }
-
       numbers.sort();
-      // Assuming the meter reading is often the largest number on the display
       target.text = numbers.last.toString();
       Get.snackbar(
         "Done",
