@@ -9,7 +9,6 @@ class CalculatorPage extends GetView<CalculatorPageController> {
 
   @override
   Widget build(BuildContext context) {
-    // Access budget controller to show UI updates
     final budgetController = Get.find<BudgetController>();
 
     return Scaffold(
@@ -76,15 +75,14 @@ class CalculatorPage extends GetView<CalculatorPageController> {
 
               const SizedBox(height: 15),
 
-              // 2. Budget Goal Card (New)
+              // 2. Budget Goal Card
               Obx(() {
                 final budget = budgetController.monthlyLimit.value;
                 final isSet = budget > 0;
                 final isOver = budgetController.isOverBudget.value;
 
                 return GestureDetector(
-                  onTap: () =>
-                      Get.toNamed('/budget'), // Navigate to budget screen
+                  onTap: () => Get.toNamed('/budget'),
                   child: Container(
                     width: double.infinity,
                     padding: const EdgeInsets.symmetric(
@@ -241,27 +239,40 @@ class CalculatorPage extends GetView<CalculatorPageController> {
 
               const SizedBox(height: 25),
 
-              // 6. Buttons
+              // 6. Buttons (Voice & Scan)
               Row(
                 children: [
                   Expanded(
-                    child: ElevatedButton.icon(
-                      onPressed: () => Get.snackbar(
-                        "Coming Soon",
-                        "Voice input is not yet implemented.",
-                      ),
-                      icon: const Icon(Icons.mic, color: Colors.black54),
-                      label: const Text(
-                        "Voice Input",
-                        style: TextStyle(color: Colors.black87, fontSize: 13),
-                      ),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.white,
-                        elevation: 0,
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          side: BorderSide(color: Colors.grey[300]!),
+                    child: Obx(
+                      () => ElevatedButton.icon(
+                        onPressed: () => controller.startVoiceInput(),
+                        icon: Icon(
+                          controller.isListening.value
+                              ? Icons.mic_off
+                              : Icons.mic,
+                          color: controller.isListening.value
+                              ? Colors.red
+                              : Colors.black54,
+                        ),
+                        label: Text(
+                          controller.isListening.value
+                              ? "Stop Listening"
+                              : "Voice Input",
+                          style: TextStyle(
+                            color: controller.isListening.value
+                                ? Colors.red
+                                : Colors.black87,
+                            fontSize: 13,
+                          ),
+                        ),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.white,
+                          elevation: 0,
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            side: BorderSide(color: Colors.grey[300]!),
+                          ),
                         ),
                       ),
                     ),

@@ -20,7 +20,6 @@ class GasReadingService {
         'user_id': reading.userId,
         'meter_value': reading.meterValue,
         'cost': reading.cost,
-        'source_type': reading.sourceType.name,
       });
       return true;
     } on Exception catch (e) {
@@ -88,11 +87,7 @@ class GasReadingService {
 
       await cloud
           .from('readings')
-          .update({
-            'meter_value': reading.meterValue,
-            'cost': reading.cost,
-            'source_type': reading.sourceType.name,
-          })
+          .update({'meter_value': reading.meterValue, 'cost': reading.cost})
           .eq('id', reading.id!);
 
       return true;

@@ -6,10 +6,12 @@ import 'package:graduation_project_depi/controllers/analytics_page_controller.da
 import 'package:image_picker/image_picker.dart';
 import 'package:graduation_project_depi/entities/reading.dart';
 import 'package:graduation_project_depi/services/electricity_reading_service.dart';
+import 'package:speech_to_text/speech_to_text.dart'
+    as stt; // Import Speech To Text
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'history_controller.dart';
-import 'budget_controller.dart'; // Import BudgetController
+import 'budget_controller.dart';
 
 class CalculatorPageController extends GetxController {
   final _readingService = Get.find<ElectricityReadingService>();
@@ -23,6 +25,9 @@ class CalculatorPageController extends GetxController {
   final lastDbReading = Rxn<int>();
 
   final picker = ImagePicker();
+
+  final stt.SpeechToText _speech = stt.SpeechToText();
+  final isListening = false.obs;
 
   @override
   void onInit() {
@@ -130,7 +135,6 @@ class CalculatorPageController extends GetxController {
       userId: userId,
       meterValue: current,
       cost: totalCost,
-      sourceType: SourceType.manual,
       createdAt: DateTime.now(),
     );
 
@@ -176,6 +180,53 @@ class CalculatorPageController extends GetxController {
     isLoading.value = false;
   }
 
+  Future<void> startVoiceInput() async {
+    if (!isListening.value) {
+      bool available = await _speech.initialize(
+        onError: (val) {
+          print('onError: $val');
+          isListening.value = false;
+        },
+        onStatus: (val) {
+          print('onStatus: $val');
+          if (val == 'done' || val == 'notListening') {
+            isListening.value = false;
+          }
+        },
+      );
+
+      if (available) {
+        isListening.value = true;
+        _speech.listen(
+          onResult: (result) {
+            String recognizedWords = result.recognizedWords;
+            final numbers = RegExp(
+              r'\d+',
+            ).allMatches(recognizedWords).map((m) => m.group(0)).join("");
+
+            if (numbers.isNotEmpty) {
+              currentReadingController.text = numbers;
+            }
+          },
+          localeId: 'ar_EG',
+          listenFor: const Duration(seconds: 15),
+          pauseFor: const Duration(seconds: 3),
+        );
+      } else {
+        Get.snackbar(
+          "Error",
+          "Speech recognition not available",
+          backgroundColor: Colors.red,
+          colorText: Colors.white,
+        );
+      }
+    } else {
+      isListening.value = false;
+      _speech.stop();
+    }
+  }
+
+  // --- Image OCR Logic ---
   Future<void> scanForField(
     TextEditingController target,
     BuildContext context,
@@ -210,7 +261,7 @@ class CalculatorPageController extends GetxController {
                   style: TextStyle(fontWeight: FontWeight.w600),
                 ),
                 onTap: () async {
-                  Navigator.pop(context);
+                  Get.back();
                   await runOCR(target, ImageSource.camera);
                 },
               ),
@@ -224,7 +275,7 @@ class CalculatorPageController extends GetxController {
                   style: TextStyle(fontWeight: FontWeight.w600),
                 ),
                 onTap: () async {
-                  Navigator.pop(context);
+                  Get.back();
                   await runOCR(target, ImageSource.gallery);
                 },
               ),
