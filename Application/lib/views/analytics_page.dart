@@ -1,227 +1,384 @@
 // analytics_view.dart
-import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:fl_chart/fl_chart.dart';
+import 'package:intl/intl.dart';
 import 'package:graduation_project_depi/controllers/analytics_page_controller.dart';
-
 
 class AnalyticsView extends StatelessWidget {
   AnalyticsView({Key? key}) : super(key: key);
 
+  // Theme Colors
+  final Color activeColor = const Color(0xFF2979FF); 
+  final Color inactiveColor = const Color(0xFFE0E0E0); 
+  final Color backgroundColor = const Color(0xFFF5F5F5);
+
+  // Helper to open details bottom sheet
+  void _showPeriodDetails(BuildContext context, AnalyticsController ctrl, String label) {
+    // This gets the INDIVIDUAL entries for that month (e.g. Dec 11, Dec 12)
+    final entries = ctrl.entriesForAggLabel(label);
+    
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
+      builder: (ctx) {
+        return DraggableScrollableSheet(
+          initialChildSize: 0.5,
+          minChildSize: 0.3,
+          maxChildSize: 0.9,
+          expand: false,
+          builder: (_, controller) {
+            return Padding(
+              padding: const EdgeInsets.fromLTRB(24, 12, 24, 24),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(width: 40, height: 4, decoration: BoxDecoration(color: Colors.grey[300], borderRadius: BorderRadius.circular(2))),
+                  const SizedBox(height: 20),
+                  Text('$label Details', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 16),
+                  if(entries.isEmpty) const Text("No records found."),
+                  Expanded(
+                    child: ListView.separated(
+                      controller: controller,
+                      itemCount: entries.length,
+                      separatorBuilder: (_, __) => const Divider(height: 1),
+                      itemBuilder: (_, i) {
+                        final e = entries[i];
+                        return ListTile(
+                          contentPadding: EdgeInsets.zero,
+                          leading: Container(
+                            padding: const EdgeInsets.all(8),
+                            decoration: BoxDecoration(color: Colors.blue[50], borderRadius: BorderRadius.circular(8)),
+                            child: const Icon(Icons.flash_on, color: Colors.blue, size: 20),
+                          ),
+                          title: Text('${e.kwh.toStringAsFixed(1)} kWh', style: const TextStyle(fontWeight: FontWeight.w600)),
+                          // Shows specific date for this entry
+                          subtitle: Text(DateFormat.yMMMd().format(e.date)),
+                          trailing: Text('\$${e.totalCost.toStringAsFixed(2)}', style: const TextStyle(fontWeight: FontWeight.bold)),
+                        );
+                      }
+                    ),
+                  )
+                ],
+              ),
+            );
+          }
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    // Ensure we find the controller
     final AnalyticsController ctrl = Get.find<AnalyticsController>();
+    final screenHeight = MediaQuery.of(context).size.height;
 
     return Scaffold(
+      backgroundColor: backgroundColor,
       appBar: AppBar(
-        title: const Text('Analytics'),
-        backgroundColor: Colors.white,
-        foregroundColor: Colors.black87,
+        backgroundColor: backgroundColor,
         elevation: 0,
+        
+        title: const Text('Analytics', style: TextStyle(color: Colors.black, fontWeight: FontWeight.w700)),
+        centerTitle: true,
+        
       ),
-      body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12),
-        child: Column(
-          children: [
-            const SizedBox(height: 6),
-            _modeToggle(ctrl),
-            const SizedBox(height: 12),
-            Obx(() {
-              final labels = ctrl.labels;
-              final values = ctrl.values;
-              final safeValues = values.map((v) => (v.isFinite && v > 0) ? v : 0.0).toList();
-              final total = safeValues.fold<double>(0.0, (p, e) => p + e);
-              return _consumptionCard(ctrl, labels, safeValues, total);
-            }),
-            const SizedBox(height: 16),
-            Obx(() => _costBreakdown(ctrl, ctrl.latest)),
-            const SizedBox(height: 12),
-          ],
+      body: SafeArea(
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 10),
+            child: Column(
+              children: [
+                _buildCustomToggle(ctrl),
+                const SizedBox(height: 20),
+
+                // Consumption Bar Chart
+                Obx(() {
+                  // Get aggregated data (SUMMED by month)
+                  final labels = ctrl.aggLabels;
+                  final values = ctrl.aggValues;
+                  
+                  // Calculate total of the visible bars
+                  final safeValues = values.map((v) => (v.isFinite && v > 0) ? v : 0.0).toList();
+                  final total = safeValues.fold<double>(0.0, (p, e) => p + e);
+
+                  return SizedBox(
+                    height: screenHeight * 0.4, 
+                    child: _buildConsumptionCard(context, ctrl, labels, safeValues, total),
+                  );
+                }),
+                
+                const SizedBox(height: 20),
+
+                // Cost Breakdown
+                Obx(() {
+                  final idx = ctrl.selectedAggIndex.value;
+                  CostBreakdown breakdown;
+                  double totalCost;
+                  
+                  if (idx >= 0 && idx < ctrl.aggLabels.length) {
+                    final label = ctrl.aggLabels[idx];
+                    // Get breakdown for the SUMMED period
+                    breakdown = ctrl.aggregatedBreakdownForLabel(label);
+                    totalCost = ctrl.totalCostForAggLabel(label);
+                  } else {
+                    breakdown = ctrl.latest?.breakdown ?? CostBreakdown(peak: 0, offPeak: 0, taxes: 0);
+                    totalCost = ctrl.latest?.totalCost ?? 0.0;
+                  }
+
+                  return _buildCostBreakdownCard(breakdown, totalCost);
+                }),
+                const SizedBox(height: 20),
+              ],
+            ),
+          ),
         ),
       ),
     );
   }
 
-  Widget _modeToggle(AnalyticsController ctrl) {
+  Widget _buildCustomToggle(AnalyticsController ctrl) {
     return Obx(() {
       final isMonthly = ctrl.mode.value == AnalyticsMode.monthly;
-      return Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          ToggleButtons(
-            isSelected: [isMonthly, !isMonthly],
-            onPressed: (i) => ctrl.setMode(i == 0 ? AnalyticsMode.monthly : AnalyticsMode.yearly),
-            borderRadius: BorderRadius.circular(8),
-            selectedColor: Colors.white,
-            fillColor: Colors.blueAccent,
-            color: Colors.black87,
-            children: const [
-              Padding(padding: EdgeInsets.symmetric(horizontal: 16, vertical: 10), child: Text('Monthly')),
-              Padding(padding: EdgeInsets.symmetric(horizontal: 16, vertical: 10), child: Text('Yearly')),
-            ],
-          ),
-        ],
+      return Container(
+        height: 45,
+        decoration: BoxDecoration(
+          color: const Color(0xFFE0E0E0),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        padding: const EdgeInsets.all(4),
+        child: Row(
+          children: [
+            Expanded(child: _toggleItem('Monthly', isMonthly, () => ctrl.setMode(AnalyticsMode.monthly))),
+            Expanded(child: _toggleItem('Yearly', !isMonthly, () => ctrl.setMode(AnalyticsMode.yearly))),
+          ],
+        ),
       );
     });
   }
 
-  Widget _consumptionCard(AnalyticsController ctrl, List<String> labels, List<double> values, double total) {
-    final maxY = ctrl.calculateMaxY(values);
-    final interval = ctrl.niceInterval(values);
+  Widget _toggleItem(String title, bool isActive, VoidCallback onTap) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+          color: isActive ? Colors.white : Colors.transparent,
+          borderRadius: BorderRadius.circular(8),
+          boxShadow: isActive ? [BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 4, offset: const Offset(0, 2))] : [],
+        ),
+        child: Text(
+          title,
+          style: TextStyle(
+            fontWeight: FontWeight.w600,
+            color: isActive ? Colors.black87 : Colors.grey[600],
+          ),
+        ),
+      ),
+    );
+  }
 
-    return Card(
-      elevation: 0,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: Padding(
-        padding: const EdgeInsets.all(14.0),
-        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-            const Text('Consumption', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
-            Column(crossAxisAlignment: CrossAxisAlignment.end, children: [
-              Text('${total.toStringAsFixed(2)} kWh', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-              const SizedBox(height: 4),
-              Text('Last ${labels.length} ${ctrl.mode.value == AnalyticsMode.monthly ? "Months" : "Years"}',
-                  style: TextStyle(color: Colors.grey[600], fontSize: 12)),
-            ]),
-          ]),
-          const SizedBox(height: 12),
-          SizedBox(
-            height: 200,
-            child: Padding(
-              padding: const EdgeInsets.only(right: 8.0),
-              child: BarChart(
-                BarChartData(
-                  alignment: BarChartAlignment.spaceBetween,
-                  maxY: maxY,
-                  barTouchData: BarTouchData(
-                    enabled: true,
-                    touchTooltipData: BarTouchTooltipData(
-                      getTooltipItem: (group, groupIndex, rod, rodIndex) {
-                        // group.x is the index
-                        final idx = group.x.toInt();
-                        final label = (idx >= 0 && idx < ctrl.entries.length) ? ctrl.labels[idx] : '';
-                        final entry = (idx >= 0 && idx < ctrl.entries.length) ? ctrl.entries[idx] : null;
-                        final kwh = entry?.kwh ?? rod.toY;
-                        final cost = entry?.totalCost ?? 0.0;
-                        return BarTooltipItem(
-                          '$label\n${kwh.toStringAsFixed(2)} kWh\n\$${cost.toStringAsFixed(2)}',
-                          const TextStyle(color: Colors.white),
+  Widget _buildConsumptionCard(BuildContext context, AnalyticsController ctrl, List<String> labels, List<double> values, double total) {
+    final maxY = ctrl.calculateMaxY(values);
+
+    return Container(
+      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(24)),
+      padding: const EdgeInsets.all(24),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text('Consumption', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Last ${labels.length} ${ctrl.mode.value == AnalyticsMode.monthly ? "Months" : "Years"}', 
+                    style: TextStyle(color: Colors.grey[500], fontSize: 13)
+                  ),
+                ],
+              ),
+              Text('${total.toInt()} kWh', style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+            ],
+          ),
+          const SizedBox(height: 20),
+          Expanded(
+            child: BarChart(
+              // CORRECTED PLACEMENT: swapAnimationDuration is here now
+              swapAnimationDuration: Duration.zero, 
+              BarChartData(
+                alignment: BarChartAlignment.spaceAround,
+                maxY: maxY * 1.1,
+                minY: 0,
+                gridData: FlGridData(show: false),
+                borderData: FlBorderData(show: false),
+                titlesData: FlTitlesData(
+                  leftTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                  rightTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                  topTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                  bottomTitles: AxisTitles(
+                    sideTitles: SideTitles(
+                      showTitles: true,
+                      reservedSize: 28,
+                      getTitlesWidget: (value, meta) {
+                        final index = value.toInt();
+                        if (index < 0 || index >= labels.length) return const SizedBox.shrink();
+                        
+                        String label = labels[index];
+                        // If it's a Year (number), keep it. If it's a Month (text > 3), shorten it.
+                        bool isYear = int.tryParse(label) != null;
+                        if (!isYear && label.length > 3) {
+                          label = label.substring(0, 3);
+                        }
+                        
+                        return Padding(
+                          padding: const EdgeInsets.only(top: 8.0),
+                          child: Text(label, style: TextStyle(color: Colors.grey[600], fontSize: 12)),
                         );
                       },
                     ),
                   ),
-                  titlesData: FlTitlesData(
-                    leftTitles: AxisTitles(
-                      sideTitles: SideTitles(
-                        showTitles: true,
-                        reservedSize: 40,
-                        interval: interval,
-                        getTitlesWidget: (double value, TitleMeta meta) {
-                          return Padding(
-                            padding: const EdgeInsets.only(right: 6.0),
-                            child: Text(value.toInt().toString(), style: const TextStyle(color: Colors.grey, fontSize: 10)),
-                          );
-                        },
+                ),
+                barTouchData: BarTouchData(
+                  enabled: true,
+                  touchCallback: (FlTouchEvent event, barTouchResponse) {
+                     if (!event.isInterestedForInteractions || barTouchResponse == null || barTouchResponse.spot == null) {
+                        return;
+                      }
+                      final touchedIndex = barTouchResponse.spot!.touchedBarGroupIndex;
+                      ctrl.selectAggIndex(touchedIndex);
+
+                      if (event is FlTapUpEvent) {
+                         _showPeriodDetails(context, ctrl, labels[touchedIndex]);
+                      }
+                  },
+                  touchTooltipData: BarTouchTooltipData(
+                    getTooltipColor: (_) => Colors.black87,
+                    tooltipBorderRadius: BorderRadius.circular(8),
+                    getTooltipItem: (group, groupIndex, rod, rodIndex) {
+                       return BarTooltipItem(
+                         '${rod.toY.toInt()} kWh',
+                         const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                       );
+                    },
+                  )
+                ),
+                barGroups: List.generate(values.length, (i) {
+                  final isSelected = i == ctrl.highlightedIndex; 
+                  return BarChartGroupData(
+                    x: i,
+                    barRods: [
+                      BarChartRodData(
+                        toY: values[i],
+                        color: isSelected ? activeColor : inactiveColor,
+                        width: 16,
+                        borderRadius: const BorderRadius.vertical(top: Radius.circular(6), bottom: Radius.circular(6)),
+                        backDrawRodData: BackgroundBarChartRodData(show: false),
+                      ),
+                    ],
+                  );
+                }),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCostBreakdownCard(CostBreakdown breakdown, double totalCost) {
+    final sections = [
+      PieChartSectionData(color: activeColor, value: breakdown.peak, radius: 12, showTitle: false),
+      PieChartSectionData(color: const Color(0xFF64B5F6), value: breakdown.offPeak, radius: 12, showTitle: false),
+      PieChartSectionData(color: inactiveColor, value: breakdown.taxes, radius: 12, showTitle: false),
+    ];
+
+    final isEmpty = breakdown.total == 0;
+    final displaySections = isEmpty 
+        ? [PieChartSectionData(color: Colors.grey[200], value: 1, radius: 12, showTitle: false)] 
+        : sections;
+
+    return Container(
+      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(24)),
+      padding: const EdgeInsets.all(24),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text('Cost Breakdown', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+          const SizedBox(height: 24),
+          Row(
+            children: [
+              SizedBox(
+                height: 140,
+                width: 140,
+                child: Stack(
+                  children: [
+                    PieChart(
+                      // CORRECTED PLACEMENT: swapAnimationDuration is here now
+                      swapAnimationDuration: Duration.zero,
+                      PieChartData(
+                        sections: displaySections,
+                        centerSpaceRadius: 55,
+                        sectionsSpace: 0,
+                        startDegreeOffset: 270,
                       ),
                     ),
-                    bottomTitles: AxisTitles(
-                      sideTitles: SideTitles(
-                        showTitles: true,
-                        reservedSize: 40,
-                        getTitlesWidget: (double value, TitleMeta meta) {
-                          final idx = value.toInt();
-                          if (idx < 0 || idx >= labels.length) return const SizedBox.shrink();
-                          final label = labels[idx];
-                          // if label longer than 6 chars, split or trim
-                          return Padding(
-                            padding: const EdgeInsets.only(top: 6.0),
-                            child: Text(label, style: const TextStyle(fontSize: 11)),
-                          );
-                        },
+                    Center(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Text("Total", style: TextStyle(color: Colors.grey, fontSize: 12)),
+                          const SizedBox(height: 4),
+                          Text(
+                            '\$${totalCost.toStringAsFixed(2)}',
+                            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                          ),
+                        ],
                       ),
                     ),
-                    topTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                    rightTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                  ),
-                  gridData: FlGridData(show: false),
-                  borderData: FlBorderData(show: false),
-                  barGroups: _makeBarGroups(values, ctrl.highlightedIndex),
+                  ],
                 ),
               ),
-            ),
-          ),
-        ]),
-      ),
-    );
-  }
-
-  List<BarChartGroupData> _makeBarGroups(List<double> values, int highlightedIndex) {
-    return List.generate(values.length, (i) {
-      final rawVal = (i < values.length) ? values[i] : 0.0;
-      final val = (rawVal.isFinite && rawVal > 0) ? rawVal : 0.0;
-      final isHighlighted = i == highlightedIndex;
-      return BarChartGroupData(
-        x: i,
-        barRods: [
-          BarChartRodData(toY: val, width: 18, borderRadius: BorderRadius.circular(6), color: isHighlighted ? Colors.blueAccent : Colors.grey[300]),
-        ],
-      );
-    });
-  }
-
-  Widget _costBreakdown(AnalyticsController ctrl, ConsumptionEntry? latestEntry) {
-    final cb = latestEntry?.breakdown ?? CostBreakdown(peak: 0, offPeak: 0, taxes: 0);
-    final total = latestEntry?.totalCost ?? cb.total;
-    final dateText = latestEntry != null ? '${latestEntry.date.year}-${latestEntry.date.month.toString().padLeft(2, '0')}-${latestEntry.date.day.toString().padLeft(2, '0')}' : 'N/A';
-    return Card(
-      elevation: 0,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 12),
-        child: Row(children: [
-          // small donut showing cost breakdown
-          SizedBox(
-            width: 90,
-            height: 90,
-            child: PieChart(
-              PieChartData(
-                sectionsSpace: 2,
-                centerSpaceRadius: 24,
-                sections: [
-                  PieChartSectionData(value: cb.peak, title: '', radius: 24, color: Colors.blueAccent),
-                  PieChartSectionData(value: cb.offPeak, title: '', radius: 24, color: Colors.lightBlueAccent.withOpacity(0.6)),
-                  PieChartSectionData(value: cb.taxes, title: '', radius: 24, color: Colors.grey[300]),
-                ],
+              const SizedBox(width: 24),
+              Expanded(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    _legendItem(activeColor, 'Peak Hours', breakdown.peak),
+                    const SizedBox(height: 12),
+                    _legendItem(const Color(0xFF64B5F6), 'Off-Peak', breakdown.offPeak),
+                    const SizedBox(height: 12),
+                    _legendItem(inactiveColor, 'Taxes & Fees', breakdown.taxes),
+                  ],
+                ),
               ),
-            ),
+            ],
           ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              const Text('Last Reading', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
-              const SizedBox(height: 6),
-              Text('Date: $dateText', style: const TextStyle(fontSize: 13)),
-              const SizedBox(height: 6),
-              Text('Total \$${total.toStringAsFixed(2)}', style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Color(0xFF1565C0))),
-              const SizedBox(height: 8),
-              _costRow('Peak Hours', cb.peak),
-              _costRow('Off-Peak', cb.offPeak),
-              _costRow('Taxes & Fees', cb.taxes),
-            ]),
-          ),
-        ]),
+        ],
       ),
     );
   }
 
-  Widget _costRow(String label, double amount) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 4),
-      child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-        Text(label, style: const TextStyle(fontSize: 12)),
-        Text('\$${amount.toStringAsFixed(2)}', style: const TextStyle(fontWeight: FontWeight.w600)),
-      ]),
+  Widget _legendItem(Color color, String label, double value) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Row(
+          children: [
+            Container(width: 8, height: 8, decoration: BoxDecoration(color: color, shape: BoxShape.circle)),
+            const SizedBox(width: 8),
+            Text(label, style: TextStyle(color: Colors.grey[600], fontSize: 12)),
+          ],
+        ),
+        Text('\$${value.toStringAsFixed(2)}', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+      ],
     );
   }
 }

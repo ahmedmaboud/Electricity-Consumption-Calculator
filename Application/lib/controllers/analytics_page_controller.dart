@@ -1,8 +1,10 @@
-// analytics_controller.dart
 import 'dart:async';
 import 'dart:math';
 import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
+import 'package:graduation_project_depi/entities/reading.dart';
+import 'package:graduation_project_depi/services/electricity_reading_service.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 enum AnalyticsMode { monthly, yearly }
 
@@ -17,16 +19,20 @@ class CostBreakdown {
   });
 
   double get total => peak + offPeak + taxes;
+
+  CostBreakdown operator +(CostBreakdown other) =>
+      CostBreakdown(peak: peak + other.peak, offPeak: offPeak + other.offPeak, taxes: taxes + other.taxes);
 }
 
-/// New: a single timestamped consumption record
 class ConsumptionEntry {
+  final int id;
   final DateTime date;
   final double kwh;
   final double totalCost;
   final CostBreakdown breakdown;
 
   ConsumptionEntry({
+    required this.id,
     required this.date,
     required this.kwh,
     required this.totalCost,
@@ -35,181 +41,204 @@ class ConsumptionEntry {
 }
 
 class AnalyticsController extends GetxController {
-  // mode toggle
   final Rx<AnalyticsMode> mode = AnalyticsMode.monthly.obs;
-
-  // Keep a list of timestamped entries (ordered by time ascending)
   final RxList<ConsumptionEntry> entries = <ConsumptionEntry>[].obs;
-
-  // Convenience maps derived from entries for charting by month/year if needed
   final RxMap<String, double> monthlyData = <String, double>{}.obs;
   final RxMap<String, double> yearlyData = <String, double>{}.obs;
-
-  // cost breakdown for the most recent entry (for donut)
   final Rx<CostBreakdown> cost = CostBreakdown(peak: 0, offPeak: 0, taxes: 0).obs;
+  final RxInt selectedAggIndex = RxInt(-1);
 
+  late final ElectricityReadingService _readingService;
+  late final SupabaseClient _supabase;
+  
   StreamSubscription? _entriesSub;
+  StreamSubscription? _authSub; // FIX: Listen for Auth Changes
 
   @override
   void onInit() {
     super.onInit();
+    _readingService = Get.find<ElectricityReadingService>();
+    _supabase = Get.find<SupabaseClient>();
 
-    // Defer seeding/subscriptions until after first frame to avoid build-time mutations.
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      // seed month placeholders if empty (optional)
-      if (monthlyData.isEmpty) {
-        monthlyData.addAll({
-          'Jan': 0.0,
-          'Feb': 0.0,
-          'Mar': 0.0,
-          'Apr': 0.0,
-          'May': 0.0,
-          'Jun': 0.0,
-        });
+    // FIX: Listen for Auth State Changes (Restoring session on restart)
+    _authSub = _supabase.auth.onAuthStateChange.listen((data) {
+      if (data.session != null) {
+        loadEntries(); // Load data as soon as session is restored
       }
+    });
 
-      // If entries change, rebuild monthly/yearly derived maps automatically
-      _entriesSub = entries.listen((list) {
-        _rebuildDerivedMaps();
-      });
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      // Try loading immediately (in case already logged in)
+      await loadEntries();
+      
+      _entriesSub = entries.listen((_) => _rebuildAggregates());
+      mode.listen((_) => selectedAggIndex.value = -1);
     });
   }
 
   @override
   void onClose() {
     _entriesSub?.cancel();
+    _authSub?.cancel();
     super.onClose();
   }
 
-  // Derived labels for the view: if monthly mode, return formatted dates (e.g. "Jun 12")
-  List<String> get labels {
-    if (mode.value == AnalyticsMode.monthly) {
-      return entries.map((e) => _shortMonthDay(e.date)).toList();
-    } else {
-      // yearly: show year + maybe month count; use year string
-      return entries.map((e) => e.date.year.toString()).toList();
+  Future<void> loadEntries() async {
+    try {
+      final userId = _supabase.auth.currentUser?.id;
+      // If null, we wait for the Auth Listener to trigger this again later
+      if (userId == null) return; 
+
+      final List<Reading> userReadings = await _readingService.getUserReadings(userId);
+
+      if (userReadings.isEmpty) {
+        entries.clear();
+        _rebuildAggregates();
+        cost.value = CostBreakdown(peak: 0, offPeak: 0, taxes: 0);
+        return;
+      }
+
+      // Sort Oldest -> Newest
+      userReadings.sort((a, b) => _safeDate(a.createdAt).compareTo(_safeDate(b.createdAt)));
+
+      final List<ConsumptionEntry> loaded = [];
+
+      for (int i = 0; i < userReadings.length; i++) {
+        final curr = userReadings[i];
+        final DateTime dateCurr = _safeDate(curr.createdAt);
+        final double meterCurr = _safeMeter(curr.meterValue);
+
+        // Logic: If first reading ever, assume previous was 0
+        final double meterPrev = (i == 0) ? 0.0 : _safeMeter(userReadings[i - 1].meterValue);
+
+        final double kwh = (meterCurr - meterPrev).isFinite ? (meterCurr - meterPrev) : 0.0;
+        final double totalCost = (curr.cost ?? 0.0).isFinite ? curr.cost ?? 0.0 : 0.0;
+
+        final breakdown = CostBreakdown(
+          peak: totalCost * 0.25,
+          offPeak: totalCost * 0.6,
+          taxes: totalCost * 0.15,
+        );
+
+        final int entryId = _safeId(curr.id);
+
+        loaded.add(ConsumptionEntry(
+          id: entryId,
+          date: dateCurr,
+          kwh: max(0.0, kwh),
+          totalCost: totalCost,
+          breakdown: breakdown,
+        ));
+      }
+
+      entries.assignAll(loaded);
+      if (entries.isNotEmpty) cost.value = entries.last.breakdown;
+
+    } catch (e) {
+      debugPrint('AnalyticsController: loadEntries failed: $e');
     }
   }
 
-  // Values for the chart (kWh)
-  List<double> get values => entries.map((e) => (e.kwh.isFinite && e.kwh > 0) ? e.kwh : 0.0).toList();
+  void refreshData() => loadEntries();
 
-  double get totalConsumption => values.fold<double>(0.0, (p, e) => p + (e.isFinite ? e : 0.0));
-
-  // Latest entry (or null)
-  ConsumptionEntry? get latest => entries.isNotEmpty ? entries.last : null;
-
-  int get highlightedIndex {
-    final vals = values;
-    if (vals.isEmpty) return -1;
-    final filtered = vals.where((v) => v.isFinite).toList();
-    if (filtered.isEmpty) return -1;
-    final maxVal = filtered.reduce(max);
-    return vals.indexOf(maxVal);
-  }
-
-  // Primary API: call this from CalculatorPageController after compute.
-  // date is required so you can pass the exact date/time of the reading.
-  void updateFromConsumption(double kwh, double totalCost, DateTime date) {
-    // sanitize numbers
-    final safeKwh = (kwh.isFinite && kwh > 0) ? kwh : 0.0;
-    final safeTotalCost = (totalCost.isFinite && totalCost > 0) ? totalCost : 0.0;
-
-    // Create cost breakdown (replace with real algorithm if available)
-    final peak = safeTotalCost * 0.25;
-    final offPeak = safeTotalCost * 0.6;
-    final taxes = safeTotalCost * 0.15;
-    final breakdown = CostBreakdown(peak: peak, offPeak: offPeak, taxes: taxes);
-
-    // create entry and push to list (keeps chronological order)
-    final entry = ConsumptionEntry(date: date, kwh: safeKwh, totalCost: safeTotalCost, breakdown: breakdown);
-
-    // If an entry for the same day exists, replace it; otherwise append
-    final sameDayIndex = entries.indexWhere((e) =>
-        e.date.year == date.year && e.date.month == date.month && e.date.day == date.day);
-    if (sameDayIndex >= 0) {
-      entries[sameDayIndex] = entry;
-    } else {
-      entries.add(entry);
-    }
-
-    // update latest cost donut
-    cost.value = breakdown;
-
-    // rebuild derived maps
-    _rebuildDerivedMaps();
-  }
-
-  // Rebuild monthlyData/yearlyData from entries
-  void _rebuildDerivedMaps() {
-    // monthlyData keyed by short month (e.g. "Jun 12") or month name depending on needs.
+  // --- Helpers ---
+  void _rebuildAggregates() {
     monthlyData.clear();
     yearlyData.clear();
-
     for (final e in entries) {
-      final monthKey = _shortMonthDay(e.date); // e.g., "Jun 12"
-      monthlyData[monthKey] = e.kwh;
-
+      final monthKey = '${_monthName(e.date.month)} ${e.date.year}';
+      monthlyData[monthKey] = (monthlyData[monthKey] ?? 0.0) + e.kwh;
       final yearKey = e.date.year.toString();
       yearlyData[yearKey] = (yearlyData[yearKey] ?? 0.0) + e.kwh;
     }
   }
 
-  // Convenience: external update
-  void updateMonthlyData(Map<String, double> newMap) {
-    monthlyData
-      ..clear()
-      ..addAll(newMap.map((k, v) => MapEntry(k, (v.isFinite && v > 0) ? v : 0.0)));
+  DateTime _safeDate(dynamic raw) {
+    if (raw == null) return DateTime.now();
+    if (raw is DateTime) return raw;
+    if (raw is String) return DateTime.tryParse(raw) ?? DateTime.now();
+    return DateTime.now();
   }
 
-  void updateYearlyData(Map<String, double> newMap) {
-    yearlyData
-      ..clear()
-      ..addAll(newMap.map((k, v) => MapEntry(k, (v.isFinite && v > 0) ? v : 0.0)));
+  double _safeMeter(dynamic raw) {
+    if (raw == null) return 0.0;
+    if (raw is num) return raw.toDouble();
+    if (raw is String) return double.tryParse(raw) ?? 0.0;
+    return 0.0;
   }
 
-  void updateCostBreakdown(CostBreakdown newCost) {
-    cost.value = CostBreakdown(
-      peak: newCost.peak.isFinite && newCost.peak > 0 ? newCost.peak : 0.0,
-      offPeak: newCost.offPeak.isFinite && newCost.offPeak > 0 ? newCost.offPeak : 0.0,
-      taxes: newCost.taxes.isFinite && newCost.taxes > 0 ? newCost.taxes : 0.0,
-    );
+  int _safeId(dynamic raw) {
+    if (raw == null) return 0;
+    if (raw is int) return raw;
+    if (raw is String) return int.tryParse(raw) ?? 0;
+    return 0;
   }
 
-  // mode control
+  String _monthName(int m) {
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    final i = (m - 1).clamp(0, 11);
+    return months[i];
+  }
+
+  List<String> get aggLabels => (mode.value == AnalyticsMode.monthly) ? monthlyData.keys.toList() : yearlyData.keys.toList();
+  List<double> get aggValues => (mode.value == AnalyticsMode.monthly) ? monthlyData.values.toList() : yearlyData.values.toList();
+  double get totalConsumption => aggValues.fold<double>(0.0, (p, e) => p + (e.isFinite ? e : 0.0));
+  ConsumptionEntry? get latest => entries.isNotEmpty ? entries.last : null;
+  int get highlightedIndex {
+    final vals = aggValues;
+    if (vals.isEmpty) return -1;
+    if (selectedAggIndex.value != -1) return selectedAggIndex.value;
+    return vals.length - 1;
+  }
+
+  void selectAggIndex(int index) => selectedAggIndex.value = index;
+  void clearSelection() => selectedAggIndex.value = -1;
+
+  List<ConsumptionEntry> entriesForAggLabel(String label) {
+    if (mode.value == AnalyticsMode.monthly) {
+      final parts = label.split(' ');
+      if (parts.length < 2) return [];
+      final monthName = parts[0];
+      final year = int.tryParse(parts[1]) ?? -1;
+      final monthIndex = _monthIndexByName(monthName);
+      if (monthIndex < 1 || year < 0) return [];
+      return entries.where((e) => e.date.month == monthIndex && e.date.year == year).toList();
+    } else {
+      final year = int.tryParse(label) ?? -1;
+      if (year < 0) return [];
+      return entries.where((e) => e.date.year == year).toList();
+    }
+  }
+
+  double totalKwhForAggLabel(String label) => entriesForAggLabel(label).fold(0.0, (p, e) => p + e.kwh);
+  double totalCostForAggLabel(String label) => entriesForAggLabel(label).fold(0.0, (p, e) => p + e.totalCost);
+  CostBreakdown aggregatedBreakdownForLabel(String label) {
+    var acc = CostBreakdown(peak: 0, offPeak: 0, taxes: 0);
+    for (final e in entriesForAggLabel(label)) {
+      acc = acc + e.breakdown;
+    }
+    return acc;
+  }
+
+  int _monthIndexByName(String name) {
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    final idx = months.indexOf(name);
+    return idx >= 0 ? idx + 1 : -1;
+  }
+
   void setMode(AnalyticsMode newMode) => mode.value = newMode;
   void toggleMode() => mode.value = (mode.value == AnalyticsMode.monthly) ? AnalyticsMode.yearly : AnalyticsMode.monthly;
 
-  // helpers for nice chart scaling (view can call)
   double calculateMaxY(List<double> vals) {
     final cleaned = vals.where((v) => v.isFinite && v > 0).toList();
     if (cleaned.isEmpty) return 10.0;
     final maxVal = cleaned.reduce(max);
     if (!(maxVal.isFinite) || maxVal <= 0) return 10.0;
-
     final magnitude = pow(10, max(0, (log(maxVal) / ln10).floor()));
     final niceBase = maxVal / magnitude;
-    double multiplier;
-    if (niceBase <= 1) multiplier = 1;
-    else if (niceBase <= 2) multiplier = 2;
-    else if (niceBase <= 5) multiplier = 5;
-    else multiplier = 10;
-
-    final nice = multiplier * magnitude;
-    return max(nice, maxVal * 1.1);
+    double multiplier = (niceBase <= 1) ? 1 : (niceBase <= 2) ? 2 : (niceBase <= 5) ? 5 : 10;
+    return max(multiplier * magnitude, maxVal * 1.1);
   }
 
-  double niceInterval(List<double> vals) {
-    final maxY = calculateMaxY(vals);
-    if (!(maxY.isFinite) || maxY <= 0) return 1.0;
-    final raw = maxY / 4.0;
-    final rounded = raw.roundToDouble();
-    return max(1.0, rounded);
-  }
-
-  // small date formatter
-  String _shortMonthDay(DateTime d) {
-    final months = ['','Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-    return '${months[d.month]} ${d.day}';
-  }
+  double niceInterval(List<double> vals) => max(1.0, (calculateMaxY(vals) / 4.0).roundToDouble());
 }
