@@ -9,10 +9,6 @@ class ProfileScreen extends GetView<ProfileController> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new),
-          onPressed: () => Get.back(),
-        ),
         title: const Text('Profile'),
         centerTitle: true,
         actions: [
@@ -37,20 +33,32 @@ class ProfileScreen extends GetView<ProfileController> {
               children: [
                 Stack(
                   children: [
-                    CircleAvatar(
-                      radius: 50,
-                      backgroundColor: Colors.grey.shade300,
-                      backgroundImage: const NetworkImage(
-                        'https://avatar.iran.liara.run/public/boy?username=Ash',
+                    // Avatar Display
+                    Obx(
+                      () => CircleAvatar(
+                        radius: 50,
+                        backgroundColor: Colors.grey.shade300,
+                        // Reconstruct full path here
+                        backgroundImage: AssetImage(
+                          'assets/avatars/${controller.tempAvatar.value}',
+                        ),
                       ),
                     ),
+                    // Edit Button
                     Positioned(
                       bottom: 0,
                       right: 0,
-                      child: CircleAvatar(
-                        radius: 16,
-                        backgroundColor: Colors.blue,
-                        child: Icon(Icons.edit, size: 16, color: Colors.white),
+                      child: GestureDetector(
+                        onTap: () => _showAvatarSelectionSheet(context),
+                        child: CircleAvatar(
+                          radius: 16,
+                          backgroundColor: Colors.blue,
+                          child: const Icon(
+                            Icons.edit,
+                            size: 16,
+                            color: Colors.white,
+                          ),
+                        ),
                       ),
                     ),
                   ],
@@ -64,6 +72,7 @@ class ProfileScreen extends GetView<ProfileController> {
                     color: Colors.black,
                   ),
                 ),
+
                 SizedBox(height: 4),
                 Text(
                   controller.currentUser?.email ?? 'No Email',
@@ -82,12 +91,14 @@ class ProfileScreen extends GetView<ProfileController> {
                 title: 'Full Name',
                 value: controller.currentUser?.name ?? 'User',
               ),
+
               const CustomDivider(),
               ProfileItem(
                 icon: Icons.email_outlined,
                 title: 'Email',
                 value: controller.currentUser?.email ?? 'No Email',
               ),
+
               const CustomDivider(),
 
               ProfileItem(
@@ -125,34 +136,6 @@ class ProfileScreen extends GetView<ProfileController> {
           ),
 
           const SizedBox(height: 20),
-
-          // --- Support Section ---
-          ProfileSection(
-            children: [
-              ProfileItem(
-                icon: Icons.help_outline,
-                title: 'Help Center',
-                hasNavigation: true,
-                onTap: () {},
-              ),
-              const CustomDivider(),
-              ProfileItem(
-                icon: Icons.description_outlined,
-                title: 'Terms of Service',
-                hasNavigation: true,
-                onTap: () {},
-              ),
-              const CustomDivider(),
-              ProfileItem(
-                icon: Icons.privacy_tip_outlined,
-                title: 'Privacy Policy',
-                hasNavigation: true,
-                onTap: () {},
-              ),
-            ],
-          ),
-
-          const SizedBox(height: 30),
 
           // --- Action Buttons ---
           SizedBox(
@@ -192,6 +175,51 @@ class ProfileScreen extends GetView<ProfileController> {
           const SizedBox(height: 30),
         ],
       ),
+    );
+  }
+
+  void _showAvatarSelectionSheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (BuildContext context) {
+        return Container(
+          padding: const EdgeInsets.all(16),
+          height: 400,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'Choose Avatar',
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 16),
+              Expanded(
+                child: GridView.builder(
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 4,
+                    crossAxisSpacing: 16,
+                    mainAxisSpacing: 16,
+                  ),
+                  itemCount: controller.avatarFilenames.length,
+                  itemBuilder: (context, index) {
+                    final filename = controller.avatarFilenames[index];
+                    return GestureDetector(
+                      onTap: () => controller.selectAvatar(filename),
+                      child: CircleAvatar(
+                        // Reconstruct full path for display
+                        backgroundImage: AssetImage('assets/avatars/$filename'),
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 }
