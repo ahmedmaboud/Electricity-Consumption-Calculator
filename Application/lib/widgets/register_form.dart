@@ -137,10 +137,14 @@ class RegisterForm extends GetView<RegisterFormController> {
   Widget _buildRegisterButton(BuildContext context, SizeConfig sizeConfig) {
     return GestureDetector(
       onTap: () async {
+        final name = controller.nameController.text.trim();
         final mail = controller.emailController.text.trim();
         final pass = controller.passwordController.text.trim();
         final confirm = controller.confirmPasswordController.text.trim();
-        final name = controller.nameController.text.trim();
+
+        if (!controller.validateEmptyFields(name, mail, pass, confirm)) return;
+        if (!controller.validateEmailFormat(mail)) return;
+        if (!controller.validatePasswordLength(pass)) return;
         if (!controller.validatePasswords(pass, confirm)) return;
 
         final success = await controller.signUp(mail, pass, name);
@@ -149,7 +153,6 @@ class RegisterForm extends GetView<RegisterFormController> {
           Get.snackbar(
             "Success",
             "Registration Success, Confirm your email",
-
             backgroundColor: Colors.blue.shade400,
             colorText: Colors.white,
           );
