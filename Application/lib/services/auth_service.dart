@@ -10,12 +10,12 @@ class AuthService {
   }
 
   void _setupAuthListener() {
-    cloud.auth.onAuthStateChange.listen((data) {
+    cloud.auth.onAuthStateChange.listen((data) async {
       final AuthChangeEvent event = data.event;
       if (event == AuthChangeEvent.passwordRecovery) {
         Get.toNamed('/update_password');
       } else if (event == AuthChangeEvent.signedIn) {
-        UserSession().loadUserInfo();
+        await UserSession().loadUserInfo();
         Get.offAllNamed('/main_shell');
       }
     });
@@ -67,6 +67,17 @@ class AuthService {
       return true;
     } catch (e) {
       print(e);
+      return false;
+    }
+  }
+
+  Future<bool> deleteAccount() async {
+    try {
+      await cloud.rpc('delete_user');
+      await logout();
+      return true;
+    } catch (e) {
+      print("Delete Account Error: $e");
       return false;
     }
   }

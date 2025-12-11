@@ -8,12 +8,14 @@ class UserProfile {
   final String authId;
   final String email;
   final String name;
+  String avatar;
   int? budgetLimit;
 
   UserProfile({
     required this.authId,
     required this.name,
     required this.email,
+    required this.avatar,
     this.budgetLimit,
   });
 
@@ -21,6 +23,7 @@ class UserProfile {
     authId: json["auth_id"],
     name: json["name"],
     email: json["email"],
+    avatar: json["avatar"],
     budgetLimit: (json["budget_limit"] as num?)?.toInt(),
   );
 
@@ -29,5 +32,6 @@ class UserProfile {
     "name": name,
     "email": email,
     "budget_limit": budgetLimit,
+    "avatar": avatar,
   };
 }

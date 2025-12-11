@@ -2,14 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:get/get.dart';
 import 'package:graduation_project_depi/controllers/history_controller.dart';
-
 import '../entities/history_item.dart';
+import 'package:graduation_project_depi/controllers/language_controller.dart';
 
 class HistoryPage extends GetView<HistoryController> {
   const HistoryPage({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final langController = Get.find<LanguageController>();
+
     if (!Get.isRegistered<HistoryController>()) {
       Get.put(HistoryController());
     }
@@ -143,7 +145,7 @@ class HistoryPage extends GetView<HistoryController> {
                             context: context,
                             firstDate: DateTime(2020),
                             lastDate: DateTime.now(),
-                          );
+                            locale: langController.isArabic.value ? Locale('ar', 'EG') : Locale('en', 'US'),                          );
                           if (picked != null) {
                             controller.setDateRange(picked);
                           }
@@ -208,7 +210,6 @@ class HistoryPage extends GetView<HistoryController> {
       ),
     );
   }
-
   Widget _buildTab(String text) {
     final isSelected = controller.selectedTab.value == text;
     return Expanded(

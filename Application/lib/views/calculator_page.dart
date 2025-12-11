@@ -9,14 +9,13 @@ class CalculatorPage extends GetView<CalculatorPageController> {
 
   @override
   Widget build(BuildContext context) {
-    // Access budget controller to show UI updates
     final budgetController = Get.find<BudgetController>();
 
     return Scaffold(
       backgroundColor: const Color(0xFFF5F5F5),
       appBar: AppBar(
-        title:Text(
-          "Meter Reading".tr,
+        title: const Text(
+          "Meter Reading",
           style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
         ),
         backgroundColor: Colors.transparent,
@@ -62,8 +61,8 @@ class CalculatorPage extends GetView<CalculatorPageController> {
                       ),
                     ),
                     const SizedBox(width: 16),
-                     Text(
-                      "Electricity".tr,
+                    const Text(
+                      "Electricity",
                       style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
@@ -76,15 +75,14 @@ class CalculatorPage extends GetView<CalculatorPageController> {
 
               const SizedBox(height: 15),
 
-              // 2. Budget Goal Card (New)
+              // 2. Budget Goal Card
               Obx(() {
                 final budget = budgetController.monthlyLimit.value;
                 final isSet = budget > 0;
                 final isOver = budgetController.isOverBudget.value;
 
                 return GestureDetector(
-                  onTap: () =>
-                      Get.toNamed('/budget'), // Navigate to budget screen
+                  onTap: () => Get.toNamed('/budget'),
                   child: Container(
                     width: double.infinity,
                     padding: const EdgeInsets.symmetric(
@@ -115,7 +113,7 @@ class CalculatorPage extends GetView<CalculatorPageController> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  "Monthly Limit".tr,
+                                  "Monthly Limit",
                                   style: TextStyle(
                                     fontSize: 12,
                                     color: Colors.grey[700],
@@ -125,8 +123,8 @@ class CalculatorPage extends GetView<CalculatorPageController> {
                                 const SizedBox(height: 2),
                                 Text(
                                   isSet
-                                      ? "${budget.toStringAsFixed(0)}  ${'currency'.tr}"
-                                      : "Tap to set limit".tr,
+                                      ? "${budget.toStringAsFixed(0)} EGP"
+                                      : "Tap to set limit",
                                   style: TextStyle(
                                     fontSize: 16,
                                     fontWeight: FontWeight.bold,
@@ -167,8 +165,8 @@ class CalculatorPage extends GetView<CalculatorPageController> {
               }),
 
               // 4. Previous Reading
-               Text(
-                "Previous Reading".tr,
+              const Text(
+                "Previous Reading",
                 style: TextStyle(
                   fontWeight: FontWeight.w600,
                   fontSize: 14,
@@ -184,7 +182,7 @@ class CalculatorPage extends GetView<CalculatorPageController> {
                   enabled: false,
                   style: const TextStyle(color: Colors.grey),
                   decoration: InputDecoration(
-                    hintText: "Fetching...".tr,
+                    hintText: "Fetching...",
                     filled: true,
                     fillColor: Colors.grey[100],
                     border: OutlineInputBorder(
@@ -203,8 +201,8 @@ class CalculatorPage extends GetView<CalculatorPageController> {
               const SizedBox(height: 20),
 
               // 5. Current Reading
-               Text(
-                "Current Reading".tr,
+              const Text(
+                "Current Reading",
                 style: TextStyle(
                   fontWeight: FontWeight.w600,
                   fontSize: 14,
@@ -216,7 +214,7 @@ class CalculatorPage extends GetView<CalculatorPageController> {
                 controller: controller.currentReadingController,
                 keyboardType: TextInputType.number,
                 decoration: InputDecoration(
-                  hintText: "Enter today's reading".tr,
+                  hintText: "Enter today's reading",
                   hintStyle: TextStyle(color: Colors.grey[400]),
                   filled: true,
                   fillColor: Colors.white,
@@ -241,27 +239,40 @@ class CalculatorPage extends GetView<CalculatorPageController> {
 
               const SizedBox(height: 25),
 
-              // 6. Buttons
+              // 6. Buttons (Voice & Scan)
               Row(
                 children: [
                   Expanded(
-                    child: ElevatedButton.icon(
-                      onPressed: () => Get.snackbar(
-                        "Coming Soon".tr,
-                        "Voice input is not yet implemented.".tr,
-                      ),
-                      icon: const Icon(Icons.mic, color: Colors.black54),
-                      label: Text(
-                        "Voice Input".tr,
-                        style: TextStyle(color: Colors.black87, fontSize: 13),
-                      ),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.white,
-                        elevation: 0,
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          side: BorderSide(color: Colors.grey[300]!),
+                    child: Obx(
+                      () => ElevatedButton.icon(
+                        onPressed: () => controller.startVoiceInput(),
+                        icon: Icon(
+                          controller.isListening.value
+                              ? Icons.mic_off
+                              : Icons.mic,
+                          color: controller.isListening.value
+                              ? Colors.red
+                              : Colors.black54,
+                        ),
+                        label: Text(
+                          controller.isListening.value
+                              ? "Stop Listening"
+                              : "Voice Input",
+                          style: TextStyle(
+                            color: controller.isListening.value
+                                ? Colors.red
+                                : Colors.black87,
+                            fontSize: 13,
+                          ),
+                        ),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.white,
+                          elevation: 0,
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            side: BorderSide(color: Colors.grey[300]!),
+                          ),
                         ),
                       ),
                     ),
@@ -277,8 +288,8 @@ class CalculatorPage extends GetView<CalculatorPageController> {
                         Icons.camera_alt_outlined,
                         color: Colors.black54,
                       ),
-                      label: Text(
-                        "Scan Meter".tr,
+                      label: const Text(
+                        "Scan Meter",
                         style: TextStyle(color: Colors.black87, fontSize: 13),
                       ),
                       style: ElevatedButton.styleFrom(
@@ -312,8 +323,8 @@ class CalculatorPage extends GetView<CalculatorPageController> {
                       borderRadius: BorderRadius.circular(16),
                     ),
                   ),
-                  child: Text(
-                    "Calculate Consumption".tr,
+                  child: const Text(
+                    "Calculate Consumption",
                     style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                   ),
                 ),
@@ -352,7 +363,7 @@ class CalculatorPage extends GetView<CalculatorPageController> {
                     child: Column(
                       children: [
                         Text(
-                          isOver ? "Limit Exceeded!".tr: "Estimated Bill".tr,
+                          isOver ? "Limit Exceeded!" : "Estimated Bill",
                           style: TextStyle(
                             fontSize: 14,
                             color: isOver ? Colors.red : Colors.grey[600],

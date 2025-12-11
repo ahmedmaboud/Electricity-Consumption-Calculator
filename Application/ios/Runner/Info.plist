@@ -56,5 +56,9 @@
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+	<key>NSSpeechRecognitionUsageDescription</key>
+    <string>This application needs the speech recognition permission to read meter values.</string>
+    <key>NSMicrophoneUsageDescription</key>
+    <string>This application needs to access your microphone to record meter values.</string>
 </dict>
 </plist>

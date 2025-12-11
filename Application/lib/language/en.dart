@@ -140,6 +140,11 @@ const Map<String, String> en = {
   'currency': 'EGP',
   'usage_summary': '@label\n@kwh kWh\n\$@cost',
   "KWH": "KWH",
+  'Choose Avatar':'Choose Avatar',
+  'date':'date',
+
+
+
 
 
 };

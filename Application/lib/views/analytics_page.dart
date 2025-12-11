@@ -65,7 +65,6 @@ class AnalyticsView extends StatelessWidget {
       );
     });
   }
-
   Widget _consumptionCard(AnalyticsController ctrl, List<String> labels, List<double> values, double total) {
     final maxY = ctrl.calculateMaxY(values);
     final interval = ctrl.niceInterval(values);
@@ -79,7 +78,7 @@ class AnalyticsView extends StatelessWidget {
           Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
              Text('Consumption'.tr, style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
             Column(crossAxisAlignment: CrossAxisAlignment.end, children: [
-              Text('${total.toStringAsFixed(2)} ${'kwh'.tr}', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+              Text('${total.toStringAsFixed(2)} ${'KWH'.tr}', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
               const SizedBox(height: 4),
               Text('${'last'.tr} ${labels.length} ${ctrl.mode.value == AnalyticsMode.monthly ? 'months'.tr : 'years'.tr}',
                   style: TextStyle(color: Colors.grey[600], fontSize: 12)),

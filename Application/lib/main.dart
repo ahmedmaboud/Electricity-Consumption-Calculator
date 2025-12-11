@@ -79,6 +79,7 @@ class MyApp extends StatelessWidget {
             Get.lazyPut<ProfileController>(() => ProfileController());
             Get.lazyPut<HistoryController>(() => HistoryController());
             Get.lazyPut<AnalyticsController>(() => AnalyticsController());
+            Get.lazyPut<BudgetController>(() => BudgetController());
           }),
         ),
         GetPage(

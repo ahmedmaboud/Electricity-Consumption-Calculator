@@ -139,9 +139,8 @@ const Map<String, String> ar = {
   'currency': 'جنيه',
   'Total For':'المجموع ل',
   'usage_summary': '@label\n@kwh كيلو وات\n@cost جنيه',
-  "KWH": "كيلووات/ساعة"
-
-
-
-
+  "KWH": "كيلووات/ساعة",
+  'months':'شهور',
+  'Choose Avatar': 'اختر صورة شخصية',
+  'date': 'التاريخ',
 };
