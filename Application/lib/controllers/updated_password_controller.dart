@@ -22,8 +22,8 @@ class UpdatePasswordController extends GetxController {
 
     if (pass.isEmpty || pass.length < 6) {
       Get.snackbar(
-        "Error",
-        "Password must be at least 6 characters",
+        "Error".tr,
+        "Password must be at least 6 characters".tr,
         backgroundColor: Colors.red.shade500,
         colorText: Colors.white,
       );
@@ -32,8 +32,8 @@ class UpdatePasswordController extends GetxController {
 
     if (pass != confirm) {
       Get.snackbar(
-        "Error",
-        "Passwords do not match",
+        "Error".tr,
+        "Passwords do not match".tr,
         backgroundColor: Colors.red.shade500,
         colorText: Colors.white,
       );
@@ -45,8 +45,8 @@ class UpdatePasswordController extends GetxController {
       await authService.updateUserPassword(pass);
 
       Get.snackbar(
-        "Success",
-        "Password updated successfully!",
+        "Success".tr,
+        "Password updated successfully!".tr,
         backgroundColor: Colors.green,
         colorText: Colors.white,
       );
@@ -55,8 +55,8 @@ class UpdatePasswordController extends GetxController {
       Get.offAllNamed('/login');
     } catch (e) {
       Get.snackbar(
-        "Error",
-        "Failed to update password: $e",
+        "Error".tr,
+        "Failed to update password: $e".tr,
         backgroundColor: Colors.red.shade500,
         colorText: Colors.white,
       );

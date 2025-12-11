@@ -24,7 +24,7 @@ class OCRPage extends StatelessWidget {
             children: [
               ListTile(
                 leading: Icon(Icons.camera_alt),
-                title: Text('Take a Photo'),
+                title: Text('Take a Photo'.tr),
                 onTap: () async {
                   Navigator.pop(context);
                   await _pickImage(ImageSource.camera);
@@ -32,7 +32,7 @@ class OCRPage extends StatelessWidget {
               ),
               ListTile(
                 leading: Icon(Icons.photo_library),
-                title: Text('Choose from Gallery'),
+                title: Text('Choose from Gallery'.tr),
                 onTap: () async {
                   Navigator.pop(context);
                   await _pickImage(ImageSource.gallery);
@@ -85,7 +85,7 @@ class OCRPage extends StatelessWidget {
           SizedBox(width: 15),
         ],
         title: Center(
-          child: Text("Extract Numbers", style: TextStyle(color: Colors.white)),
+          child: Text("Extract Numbers".tr, style: TextStyle(color: Colors.white)),
         ),
         backgroundColor: Colors.blueAccent,
       ),
@@ -93,7 +93,7 @@ class OCRPage extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text("Extracted Numbers:", style: TextStyle(fontSize: 18)),
+            Text("Extracted Numbers:".tr, style: TextStyle(fontSize: 18)),
             SizedBox(height: 20),
             Obx(() {
               if (isLoading.value) {
@@ -101,12 +101,12 @@ class OCRPage extends StatelessWidget {
                   children: [
                     SpinKitWave(color: Colors.yellow, size: 50.0),
                     SizedBox(height: 10),
-                    Text("Processing image...", style: TextStyle(fontSize: 16)),
+                    Text("Processing image...".tr, style: TextStyle(fontSize: 16)),
                   ],
                 );
               } else {
                 return Text(
-                  result.value.isEmpty ? "No numbers found yet" : result.value,
+                  result.value.isEmpty ? "No numbers found yet".tr : result.value,
                   style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                   textAlign: TextAlign.center,
                 );
@@ -126,7 +126,7 @@ class OCRPage extends StatelessWidget {
                 elevation: 5,
               ),
               child: Text(
-                "Select Image",
+                "Select Image".tr,
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
             ),

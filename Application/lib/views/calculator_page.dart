@@ -15,8 +15,8 @@ class CalculatorPage extends GetView<CalculatorPageController> {
     return Scaffold(
       backgroundColor: const Color(0xFFF5F5F5),
       appBar: AppBar(
-        title: const Text(
-          "Meter Reading",
+        title:Text(
+          "Meter Reading".tr,
           style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
         ),
         backgroundColor: Colors.transparent,
@@ -62,8 +62,8 @@ class CalculatorPage extends GetView<CalculatorPageController> {
                       ),
                     ),
                     const SizedBox(width: 16),
-                    const Text(
-                      "Electricity",
+                     Text(
+                      "Electricity".tr,
                       style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
@@ -115,7 +115,7 @@ class CalculatorPage extends GetView<CalculatorPageController> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  "Monthly Limit",
+                                  "Monthly Limit".tr,
                                   style: TextStyle(
                                     fontSize: 12,
                                     color: Colors.grey[700],
@@ -125,8 +125,8 @@ class CalculatorPage extends GetView<CalculatorPageController> {
                                 const SizedBox(height: 2),
                                 Text(
                                   isSet
-                                      ? "${budget.toStringAsFixed(0)} EGP"
-                                      : "Tap to set limit",
+                                      ? "${budget.toStringAsFixed(0)}  ${'currency'.tr}"
+                                      : "Tap to set limit".tr,
                                   style: TextStyle(
                                     fontSize: 16,
                                     fontWeight: FontWeight.bold,
@@ -167,8 +167,8 @@ class CalculatorPage extends GetView<CalculatorPageController> {
               }),
 
               // 4. Previous Reading
-              const Text(
-                "Previous Reading",
+               Text(
+                "Previous Reading".tr,
                 style: TextStyle(
                   fontWeight: FontWeight.w600,
                   fontSize: 14,
@@ -184,7 +184,7 @@ class CalculatorPage extends GetView<CalculatorPageController> {
                   enabled: false,
                   style: const TextStyle(color: Colors.grey),
                   decoration: InputDecoration(
-                    hintText: "Fetching...",
+                    hintText: "Fetching...".tr,
                     filled: true,
                     fillColor: Colors.grey[100],
                     border: OutlineInputBorder(
@@ -203,8 +203,8 @@ class CalculatorPage extends GetView<CalculatorPageController> {
               const SizedBox(height: 20),
 
               // 5. Current Reading
-              const Text(
-                "Current Reading",
+               Text(
+                "Current Reading".tr,
                 style: TextStyle(
                   fontWeight: FontWeight.w600,
                   fontSize: 14,
@@ -216,7 +216,7 @@ class CalculatorPage extends GetView<CalculatorPageController> {
                 controller: controller.currentReadingController,
                 keyboardType: TextInputType.number,
                 decoration: InputDecoration(
-                  hintText: "Enter today's reading",
+                  hintText: "Enter today's reading".tr,
                   hintStyle: TextStyle(color: Colors.grey[400]),
                   filled: true,
                   fillColor: Colors.white,
@@ -247,12 +247,12 @@ class CalculatorPage extends GetView<CalculatorPageController> {
                   Expanded(
                     child: ElevatedButton.icon(
                       onPressed: () => Get.snackbar(
-                        "Coming Soon",
-                        "Voice input is not yet implemented.",
+                        "Coming Soon".tr,
+                        "Voice input is not yet implemented.".tr,
                       ),
                       icon: const Icon(Icons.mic, color: Colors.black54),
-                      label: const Text(
-                        "Voice Input",
+                      label: Text(
+                        "Voice Input".tr,
                         style: TextStyle(color: Colors.black87, fontSize: 13),
                       ),
                       style: ElevatedButton.styleFrom(
@@ -277,8 +277,8 @@ class CalculatorPage extends GetView<CalculatorPageController> {
                         Icons.camera_alt_outlined,
                         color: Colors.black54,
                       ),
-                      label: const Text(
-                        "Scan Meter",
+                      label: Text(
+                        "Scan Meter".tr,
                         style: TextStyle(color: Colors.black87, fontSize: 13),
                       ),
                       style: ElevatedButton.styleFrom(
@@ -312,8 +312,8 @@ class CalculatorPage extends GetView<CalculatorPageController> {
                       borderRadius: BorderRadius.circular(16),
                     ),
                   ),
-                  child: const Text(
-                    "Calculate Consumption",
+                  child: Text(
+                    "Calculate Consumption".tr,
                     style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                   ),
                 ),
@@ -352,7 +352,7 @@ class CalculatorPage extends GetView<CalculatorPageController> {
                     child: Column(
                       children: [
                         Text(
-                          isOver ? "Limit Exceeded!" : "Estimated Bill",
+                          isOver ? "Limit Exceeded!".tr: "Estimated Bill".tr,
                           style: TextStyle(
                             fontSize: 14,
                             color: isOver ? Colors.red : Colors.grey[600],

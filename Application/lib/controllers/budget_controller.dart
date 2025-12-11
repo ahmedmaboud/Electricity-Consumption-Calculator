@@ -102,8 +102,8 @@ class BudgetController extends GetxController {
       isOverBudget.value = false;
       if (newBillAmount > 0) {
         Get.snackbar(
-          'Warning',
-          'You are at ${(usagePercentage.value * 100).toStringAsFixed(0)}% of your monthly budget.',
+          'Warning'.tr,
+          'budget_usage'.trArgs([(usagePercentage.value * 100).toStringAsFixed(0)]),
           backgroundColor: Colors.orange.shade700,
           colorText: Colors.white,
           duration: const Duration(seconds: 4),

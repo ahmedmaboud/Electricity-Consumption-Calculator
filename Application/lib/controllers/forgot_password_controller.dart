@@ -14,8 +14,8 @@ class ForgotPasswordController extends GetxController {
 
     if (!GetUtils.isEmail(email)) {
       Get.snackbar(
-        "Error",
-        "Please enter a valid email address",
+        "Error".tr,
+        "Please enter a valid email address".tr,
         backgroundColor: Colors.red.shade500,
         colorText: Colors.white,
       );
@@ -28,8 +28,8 @@ class ForgotPasswordController extends GetxController {
 
       // Success Feedback
       Get.defaultDialog(
-        title: "Check your email",
-        middleText: "We have sent a password reset link to $email.",
+        title: "Check your email".tr,
+        middleText: "We have sent a password reset link to %s.".trArgs([email]),
         textConfirm: "OK",
         confirmTextColor: Colors.white,
         onConfirm: () {
@@ -39,8 +39,8 @@ class ForgotPasswordController extends GetxController {
       );
     } catch (e) {
       Get.snackbar(
-        "Error",
-        "Failed to send reset link: $e",
+        "Error".tr,
+        "Failed to send reset link: %s".trArgs([e.toString()]),
         backgroundColor: Colors.red.shade500,
         colorText: Colors.white,
       );

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../controllers/profile_controller.dart';
+import '../controllers/language_controller.dart';
 
 class ProfileScreen extends GetView<ProfileController> {
   const ProfileScreen({super.key});
@@ -13,13 +14,13 @@ class ProfileScreen extends GetView<ProfileController> {
           icon: const Icon(Icons.arrow_back_ios_new),
           onPressed: () => Get.back(),
         ),
-        title: const Text('Profile'),
+        title: Text('Profile'.tr),
         centerTitle: true,
         actions: [
           TextButton(
             onPressed: controller.saveSettings,
-            child: const Text(
-              'Save',
+            child: Text(
+              'Save'.tr,
               style: TextStyle(
                 color: Colors.blue,
                 fontSize: 16,
@@ -57,7 +58,7 @@ class ProfileScreen extends GetView<ProfileController> {
                 ),
                 SizedBox(height: 16),
                 Text(
-                  controller.currentUser?.name ?? 'User',
+                  controller.currentUser?.name ?? 'User'.tr,
                   style: const TextStyle(
                     fontSize: 22,
                     fontWeight: FontWeight.bold,
@@ -66,7 +67,7 @@ class ProfileScreen extends GetView<ProfileController> {
                 ),
                 SizedBox(height: 4),
                 Text(
-                  controller.currentUser?.email ?? 'No Email',
+                  controller.currentUser?.email ?? 'No Email'.tr,
                   style: const TextStyle(fontSize: 14, color: Colors.grey),
                 ),
               ],
@@ -79,35 +80,47 @@ class ProfileScreen extends GetView<ProfileController> {
             children: [
               ProfileItem(
                 icon: Icons.person_outline,
-                title: 'Full Name',
-                value: controller.currentUser?.name ?? 'User',
+                title: 'Full Name'.tr,
+                value: controller.currentUser?.name ?? 'User'.tr,
               ),
               const CustomDivider(),
               ProfileItem(
                 icon: Icons.email_outlined,
-                title: 'Email',
-                value: controller.currentUser?.email ?? 'No Email',
+                title: 'Email'.tr,
+                value: (controller.currentUser?.email ?? 'No Email'.tr).length > 25
+                    ? '${(controller.currentUser?.email ?? 'No Email'.tr).substring(0, 25)}...'
+                    : controller.currentUser?.email ?? 'No Email'.tr,
               ),
               const CustomDivider(),
-
               ProfileItem(
                 icon: Icons.lock_outline,
-                title: 'Change Password',
+                title: 'Change Password'.tr,
                 hasNavigation: true,
                 onTap: () => Get.toNamed('/update_password'),
               ),
             ],
           ),
-
           const SizedBox(height: 20),
-
           // --- Settings Section ---
           ProfileSection(
             children: [
+              Obx(() {
+                  final langController = Get.find<LanguageController>();
+                  return SwitchItem(
+                    icon: Icons.language,
+                    title: 'Language'.tr,
+                    value: langController.isArabic.value,
+                    onChanged: (val) {
+                      langController.toggleLanguage(val);
+                    },
+                  );
+                },
+              ),
+              const CustomDivider(),
               Obx(
                 () => SwitchItem(
                   icon: Icons.notifications_none,
-                  title: 'Push Notifications',
+                  title: 'Push Notifications'.tr,
                   value: controller.pushNotifications.value,
                   onChanged: controller.toggleNotifications,
                 ),
@@ -116,7 +129,7 @@ class ProfileScreen extends GetView<ProfileController> {
               Obx(
                 () => SwitchItem(
                   icon: Icons.dark_mode_outlined,
-                  title: 'Dark Mode',
+                  title: 'Dark Mode'.tr,
                   value: controller.darkMode.value,
                   onChanged: controller.toggleDarkMode,
                 ),
@@ -131,21 +144,21 @@ class ProfileScreen extends GetView<ProfileController> {
             children: [
               ProfileItem(
                 icon: Icons.help_outline,
-                title: 'Help Center',
+                title: 'Help Center'.tr,
                 hasNavigation: true,
                 onTap: () {},
               ),
               const CustomDivider(),
               ProfileItem(
                 icon: Icons.description_outlined,
-                title: 'Terms of Service',
+                title: 'Terms of Service'.tr,
                 hasNavigation: true,
                 onTap: () {},
               ),
               const CustomDivider(),
               ProfileItem(
                 icon: Icons.privacy_tip_outlined,
-                title: 'Privacy Policy',
+                title: 'Privacy Policy'.tr,
                 hasNavigation: true,
                 onTap: () {},
               ),
@@ -167,8 +180,8 @@ class ProfileScreen extends GetView<ProfileController> {
                 ),
                 elevation: 0,
               ),
-              child: const Text(
-                'Log Out',
+              child: Text(
+                'Log Out'.tr,
                 style: TextStyle(
                   color: Colors.white,
                   fontSize: 16,
@@ -180,8 +193,8 @@ class ProfileScreen extends GetView<ProfileController> {
           const SizedBox(height: 16),
           TextButton(
             onPressed: controller.deleteAccount,
-            child: const Text(
-              'Delete Account',
+            child: Text(
+              'Delete Account'.tr,
               style: TextStyle(
                 color: Colors.red,
                 fontSize: 14,

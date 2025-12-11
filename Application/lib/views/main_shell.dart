@@ -82,11 +82,11 @@ class _MainShellState extends State<MainShell> {
               selectedItemColor: const Color(0xFF1976D2),
               unselectedItemColor: Colors.grey,
               showUnselectedLabels: true,
-              items: const [
-                BottomNavigationBarItem(icon: Icon(Icons.home_outlined), activeIcon: Icon(Icons.home), label: 'Home'),
-                BottomNavigationBarItem(icon: Icon(Icons.history), label: 'History'),
-                BottomNavigationBarItem(icon: Icon(Icons.bar_chart), label: 'Analytics'),
-                BottomNavigationBarItem(icon: Icon(Icons.person_outline), activeIcon: Icon(Icons.person), label: 'Profile'),
+              items: [
+                BottomNavigationBarItem(icon: Icon(Icons.home_outlined), activeIcon: Icon(Icons.home), label: 'Home'.tr),
+                BottomNavigationBarItem(icon: Icon(Icons.history), label: 'History'.tr),
+                BottomNavigationBarItem(icon: Icon(Icons.bar_chart), label: 'Analytics'.tr),
+                BottomNavigationBarItem(icon: Icon(Icons.person_outline), activeIcon: Icon(Icons.person), label: 'Profile'.tr),
               ],
             ),
           ),

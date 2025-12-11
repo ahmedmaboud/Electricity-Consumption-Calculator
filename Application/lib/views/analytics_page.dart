@@ -15,7 +15,7 @@ class AnalyticsView extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Analytics'),
+        title: Text('Analytics'.tr),
         backgroundColor: Colors.white,
         foregroundColor: Colors.black87,
         elevation: 0,
@@ -56,9 +56,9 @@ class AnalyticsView extends StatelessWidget {
             selectedColor: Colors.white,
             fillColor: Colors.blueAccent,
             color: Colors.black87,
-            children: const [
-              Padding(padding: EdgeInsets.symmetric(horizontal: 16, vertical: 10), child: Text('Monthly')),
-              Padding(padding: EdgeInsets.symmetric(horizontal: 16, vertical: 10), child: Text('Yearly')),
+            children: [
+              Padding(padding: EdgeInsets.symmetric(horizontal: 16, vertical: 10), child: Text('Monthly'.tr)),
+              Padding(padding: EdgeInsets.symmetric(horizontal: 16, vertical: 10), child: Text('Yearly'.tr)),
             ],
           ),
         ],
@@ -77,11 +77,11 @@ class AnalyticsView extends StatelessWidget {
         padding: const EdgeInsets.all(14.0),
         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
           Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-            const Text('Consumption', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+             Text('Consumption'.tr, style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
             Column(crossAxisAlignment: CrossAxisAlignment.end, children: [
-              Text('${total.toStringAsFixed(2)} kWh', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+              Text('${total.toStringAsFixed(2)} ${'kwh'.tr}', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
               const SizedBox(height: 4),
-              Text('Last ${labels.length} ${ctrl.mode.value == AnalyticsMode.monthly ? "Months" : "Years"}',
+              Text('${'last'.tr} ${labels.length} ${ctrl.mode.value == AnalyticsMode.monthly ? 'months'.tr : 'years'.tr}',
                   style: TextStyle(color: Colors.grey[600], fontSize: 12)),
             ]),
           ]),
@@ -105,7 +105,7 @@ class AnalyticsView extends StatelessWidget {
                         final kwh = entry?.kwh ?? rod.toY;
                         final cost = entry?.totalCost ?? 0.0;
                         return BarTooltipItem(
-                          '$label\n${kwh.toStringAsFixed(2)} kWh\n\$${cost.toStringAsFixed(2)}',
+                          '${label.tr}\n${kwh.toStringAsFixed(2)} ${'KWH'.tr}\n\$${cost.toStringAsFixed(2)}',
                           const TextStyle(color: Colors.white),
                         );
                       },
@@ -173,7 +173,7 @@ class AnalyticsView extends StatelessWidget {
   Widget _costBreakdown(AnalyticsController ctrl, ConsumptionEntry? latestEntry) {
     final cb = latestEntry?.breakdown ?? CostBreakdown(peak: 0, offPeak: 0, taxes: 0);
     final total = latestEntry?.totalCost ?? cb.total;
-    final dateText = latestEntry != null ? '${latestEntry.date.year}-${latestEntry.date.month.toString().padLeft(2, '0')}-${latestEntry.date.day.toString().padLeft(2, '0')}' : 'N/A';
+    final dateText = latestEntry != null ? '${latestEntry.date.year}-${latestEntry.date.month.toString().padLeft(2, '0')}-${latestEntry.date.day.toString().padLeft(2, '0')}' : 'N/A'.tr;
     return Card(
       elevation: 0,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -199,15 +199,15 @@ class AnalyticsView extends StatelessWidget {
           const SizedBox(width: 12),
           Expanded(
             child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              const Text('Last Reading', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
+               Text('Last Reading'.tr, style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
               const SizedBox(height: 6),
-              Text('Date: $dateText', style: const TextStyle(fontSize: 13)),
+              Text( '${'date'.tr} $dateText', style: const TextStyle(fontSize: 13)),
               const SizedBox(height: 6),
-              Text('Total \$${total.toStringAsFixed(2)}', style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Color(0xFF1565C0))),
+              Text(  '${'total'.tr} \$${total.toStringAsFixed(2)}',style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Color(0xFF1565C0))),
               const SizedBox(height: 8),
-              _costRow('Peak Hours', cb.peak),
-              _costRow('Off-Peak', cb.offPeak),
-              _costRow('Taxes & Fees', cb.taxes),
+              _costRow('Peak Hours'.tr, cb.peak),
+              _costRow('Off-Peak'.tr, cb.offPeak),
+              _costRow('Taxes & Fees'.tr, cb.taxes),
             ]),
           ),
         ]),

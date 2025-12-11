@@ -207,9 +207,17 @@ class AnalyticsController extends GetxController {
     return max(1.0, rounded);
   }
 
+    Map<String, List<String>> months = {
+    'en': ['', 'Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'],
+    'ar': ['', 'يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'],
+  };
+
+
   // small date formatter
   String _shortMonthDay(DateTime d) {
-    final months = ['','Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-    return '${months[d.month]} ${d.day}';
+    final lang = Get.locale?.languageCode ?? 'en';
+    final monthList = months[lang]!;
+    return '${monthList[d.month]} ${d.day}';
+
   }
 }

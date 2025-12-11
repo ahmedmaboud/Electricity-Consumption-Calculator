@@ -17,8 +17,8 @@ class HistoryPage extends GetView<HistoryController> {
     return Scaffold(
       backgroundColor: const Color(0xFFF9FAFB),
       appBar: AppBar(
-        title: const Text(
-          "Consumption History",
+        title: Text(
+          "Consumption History".tr,
           style: TextStyle(
             color: Colors.black,
             fontWeight: FontWeight.bold,
@@ -31,7 +31,7 @@ class HistoryPage extends GetView<HistoryController> {
         actions: [
           IconButton(
             icon: const Icon(Icons.delete_outline, color: Colors.red),
-            tooltip: "Reset History",
+            tooltip: "Reset History".tr,
             onPressed: () => _showDeleteConfirmation(context),
           ),
           const SizedBox(width: 10),
@@ -71,8 +71,8 @@ class HistoryPage extends GetView<HistoryController> {
                     children: [
                       Text(
                         controller.selectedDateRange.value != null
-                            ? "Selected Range Total"
-                            : "Total (${controller.selectedTab.value})",
+                            ? "Selected Range Total".tr
+                            :"${'Total For'.tr} (${controller.selectedTab.value.tr})",
                         style: const TextStyle(
                           color: Colors.grey,
                           fontSize: 14,
@@ -85,7 +85,7 @@ class HistoryPage extends GetView<HistoryController> {
                           AnimatedSwitcher(
                             duration: const Duration(milliseconds: 300),
                             child: Text(
-                              "${controller.totalConsumption.value} kWh",
+                                "${controller.totalConsumption.value} ${'KWH'.tr}",
                               key: ValueKey(controller.totalConsumption.value),
                               style: const TextStyle(
                                 fontSize: 28,
@@ -95,7 +95,7 @@ class HistoryPage extends GetView<HistoryController> {
                           ),
                           const Spacer(),
                           Text(
-                            "${controller.totalCost.value.toStringAsFixed(2)} EGP",
+                            "${controller.totalCost.value.toStringAsFixed(2)} ${'currency'.tr}",
                             style: const TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.bold,
@@ -108,9 +108,7 @@ class HistoryPage extends GetView<HistoryController> {
                     ],
                   ),
                 ),
-
                 const SizedBox(height: 20),
-
                 // 2. Interactive Tabs
                 Container(
                   padding: const EdgeInsets.all(4),
@@ -118,7 +116,7 @@ class HistoryPage extends GetView<HistoryController> {
                     color: Colors.grey[200],
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  child: Row(children: [_buildTab("Month"), _buildTab("Year")]),
+                  child: Row(children: [_buildTab("Month".tr), _buildTab("Year".tr)]),
                 ),
 
                 const SizedBox(height: 20),
@@ -130,8 +128,8 @@ class HistoryPage extends GetView<HistoryController> {
                       child: _buildFilterButton(
                         icon: Icons.swap_vert,
                         label: controller.isNewestFirst.value
-                            ? "Sort: Newest"
-                            : "Sort: Oldest",
+                            ? "${'Sort'.tr}: ${'Newest'.tr}"
+                            : "${'Sort'.tr}: ${'Oldest'.tr}",
                         onTap: () => controller.toggleSort(),
                       ),
                     ),
@@ -139,7 +137,7 @@ class HistoryPage extends GetView<HistoryController> {
                     Expanded(
                       child: _buildFilterButton(
                         icon: Icons.calendar_today,
-                        label: "Filter Date",
+                        label: "Filter Date".tr,
                         onTap: () async {
                           final picked = await showDateRangePicker(
                             context: context,
@@ -162,7 +160,7 @@ class HistoryPage extends GetView<HistoryController> {
                   child: controller.historyItems.isEmpty
                       ? Center(
                           child: Text(
-                            "No readings found for this period.",
+                            "No readings found for this period.".tr,
                             style: TextStyle(color: Colors.grey[400]),
                           ),
                         )
@@ -183,27 +181,26 @@ class HistoryPage extends GetView<HistoryController> {
       }),
     );
   }
-
   void _showDeleteConfirmation(BuildContext context) {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text("Reset History"),
-        content: const Text(
-          "Are you sure you want to delete ALL reading history? This action cannot be undone.",
+        title: Text("Reset History".tr),
+        content: Text(
+          "Are you sure you want to delete ALL reading history? This action cannot be undone.".tr,
         ),
         actions: [
           TextButton(
             onPressed: () => Get.back(),
-            child: const Text("Cancel", style: TextStyle(color: Colors.black)),
+            child: Text("Cancel".tr, style: TextStyle(color: Colors.black)),
           ),
           TextButton(
             onPressed: () {
               Get.back();
               controller.clearHistory();
             },
-            child: const Text(
-              "Delete All",
+            child: Text(
+              "Delete All".tr,
               style: TextStyle(color: Colors.red),
             ),
           ),
@@ -300,7 +297,7 @@ class HistoryPage extends GetView<HistoryController> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  "${item.consumption} kWh",
+                  "${item.consumption} ${'KWH'.tr}",
                   style: const TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 16,
@@ -315,7 +312,7 @@ class HistoryPage extends GetView<HistoryController> {
             ),
           ),
           Text(
-            "${item.cost.toStringAsFixed(2)} EGP",
+            "${item.cost.toStringAsFixed(2)} ${'currency'.tr}",
             style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
           ),
         ],

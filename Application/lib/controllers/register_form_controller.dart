@@ -16,8 +16,8 @@ class RegisterFormController extends GetxController {
   bool validatePasswords(String pass, String confirmPass) {
     if (pass != confirmPass) {
       Get.snackbar(
-        "Password Error",
-        "Password and Confirm Password do not match!",
+        "Password Error".tr,
+        "Password and Confirm Password do not match!".tr,
         backgroundColor: Colors.red,
         colorText: Colors.white,
         snackPosition: SnackPosition.BOTTOM,

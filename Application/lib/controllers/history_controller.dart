@@ -208,15 +208,15 @@ class HistoryController extends GetxController {
       Get.find<CalculatorPageController>().lastDbReading.value = 0;
 
       Get.snackbar(
-        "Success",
-        "All history cleared successfully",
+        "Success".tr,
+        "All history cleared successfully".tr,
         backgroundColor: Colors.green,
         colorText: Colors.white,
       );
     } else {
       Get.snackbar(
-        "Error",
-        "Failed to clear history",
+        "Error".tr,
+        "Failed to clear history".tr,
         backgroundColor: Colors.red,
         colorText: Colors.white,
       );

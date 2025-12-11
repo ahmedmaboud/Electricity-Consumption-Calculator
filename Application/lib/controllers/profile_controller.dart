@@ -28,8 +28,8 @@ class ProfileController extends GetxController {
   void saveSettings() {
     // actual save logic here
     Get.snackbar(
-      "Saved",
-      "Profile settings saved locally",
+      "Saved".tr,
+      "Profile settings saved locally".tr,
       backgroundColor: Colors.green.shade400,
       colorText: Colors.white,
       snackPosition: SnackPosition.BOTTOM,
@@ -42,8 +42,8 @@ class ProfileController extends GetxController {
     UserSession().clear(); // Clear local session data
     Get.offAllNamed('/login');
     Get.snackbar(
-      "Logged Out",
-      "You have been logged out successfully!",
+      "Logged Out".tr,
+      "You have been logged out successfully!".tr,
       backgroundColor: Colors.blue.shade400,
       colorText: Colors.white,
     );
@@ -52,11 +52,11 @@ class ProfileController extends GetxController {
   void deleteAccount() {
     // Add delete account logic confirmation dialog here
     Get.defaultDialog(
-      title: "Delete Account",
+      title: "Delete Account".tr,
       middleText:
-          "Are you sure you want to delete your account? This cannot be undone.",
-      textConfirm: "Delete",
-      textCancel: "Cancel",
+          "Are you sure you want to delete your account? This cannot be undone.".tr,
+      textConfirm: "Delete".tr,
+      textCancel: "Cancel".tr,
       confirmTextColor: Colors.white,
       onConfirm: () {
         // Call delete API

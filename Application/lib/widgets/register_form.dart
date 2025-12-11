@@ -18,7 +18,7 @@ class RegisterForm extends GetView<RegisterFormController> {
         ),
         SizedBox(height: sizeConfig.isMobile ? 20 : 30),
         Text(
-          'Create Account',
+          'Create Account'.tr,
           style: TextStyle(
             fontSize: sizeConfig.isMobile ? 28 : 36,
             fontWeight: FontWeight.bold,
@@ -27,7 +27,7 @@ class RegisterForm extends GetView<RegisterFormController> {
         ),
         SizedBox(height: sizeConfig.isMobile ? 8 : 12),
         Text(
-          "Let's get you started!",
+          "Let's get you started!".tr,
           style: TextStyle(
             fontSize: sizeConfig.isMobile ? 16 : 20,
             color: Colors.black54,
@@ -37,21 +37,21 @@ class RegisterForm extends GetView<RegisterFormController> {
         _buildTextField(
           cont: controller.nameController,
           sizeConfig: sizeConfig,
-          hintText: 'Full Name',
+          hintText: 'Full Name'.tr,
           prefixIcon: Icons.person_outline_rounded,
         ),
         SizedBox(height: sizeConfig.isMobile ? 16 : 24),
         _buildTextField(
           cont: controller.emailController,
           sizeConfig: sizeConfig,
-          hintText: 'Email Address',
+          hintText: 'Email Address'.tr,
           prefixIcon: Icons.email_outlined,
         ),
         SizedBox(height: sizeConfig.isMobile ? 16 : 24),
         _buildTextField(
           cont: controller.passwordController,
           sizeConfig: sizeConfig,
-          hintText: 'Password',
+          hintText: 'Password'.tr,
           prefixIcon: Icons.lock_outline_rounded,
           obscureText: true,
         ),
@@ -59,7 +59,7 @@ class RegisterForm extends GetView<RegisterFormController> {
         _buildTextField(
           cont: controller.confirmPasswordController,
           sizeConfig: sizeConfig,
-          hintText: 'Confirm Password',
+          hintText: 'Confirm Password'.tr,
           prefixIcon: Icons.lock_outline_rounded,
           obscureText: true,
         ),
@@ -71,7 +71,7 @@ class RegisterForm extends GetView<RegisterFormController> {
           crossAxisAlignment: WrapCrossAlignment.center,
           children: [
             Text(
-              "Already have an account?",
+              "Already have an account?".tr,
               style: TextStyle(
                 color: Colors.black54,
                 fontSize: sizeConfig.isMobile ? 14 : 16,
@@ -82,7 +82,7 @@ class RegisterForm extends GetView<RegisterFormController> {
                 Get.back();
               },
               child: Text(
-                'Sign In',
+                'Sign In'.tr,
                 style: TextStyle(
                   color: Colors.blue[700],
                   fontWeight: FontWeight.bold,
@@ -147,8 +147,8 @@ class RegisterForm extends GetView<RegisterFormController> {
 
         if (success) {
           Get.snackbar(
-            "Success",
-            "Registration Success, Confirm your email",
+            "Success".tr,
+            "Registration Success, Confirm your email".tr,
 
             backgroundColor: Colors.blue.shade400,
             colorText: Colors.white,
@@ -156,8 +156,8 @@ class RegisterForm extends GetView<RegisterFormController> {
           Get.offAllNamed('/login');
         } else {
           Get.snackbar(
-            "Error",
-            "Registration failed",
+            "Error".tr,
+            "Registration failed".tr,
             backgroundColor: Colors.red,
             colorText: Colors.white,
           );
@@ -184,7 +184,7 @@ class RegisterForm extends GetView<RegisterFormController> {
         ),
         child: Center(
           child: Text(
-            'Sign Up',
+            'Sign Up'.tr,
             style: TextStyle(
               color: Colors.white,
               fontWeight: FontWeight.bold,

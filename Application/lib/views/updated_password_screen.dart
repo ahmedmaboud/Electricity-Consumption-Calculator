@@ -16,8 +16,8 @@ class UpdatePasswordScreen extends GetView<UpdatePasswordController> {
           icon: const Icon(Icons.arrow_back, color: Colors.black),
           onPressed: () => Get.back(),
         ),
-        title: const Text(
-          "Set New Password",
+        title: Text(
+          "Set New Password".tr,
           style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
         ),
         centerTitle: true,
@@ -29,8 +29,8 @@ class UpdatePasswordScreen extends GetView<UpdatePasswordController> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const SizedBox(height: 30),
-              const Text(
-                "Create a New\nPassword",
+               Text(
+                "Create a New\nPassword".tr,
                 style: TextStyle(
                   fontSize: 28,
                   fontWeight: FontWeight.w900,
@@ -38,15 +38,15 @@ class UpdatePasswordScreen extends GetView<UpdatePasswordController> {
                 ),
               ),
               const SizedBox(height: 12),
-              const Text(
-                "Your new password must be different from previous used passwords.",
+               Text(
+                "Your new password must be different from previous used passwords.".tr,
                 style: TextStyle(fontSize: 16, color: Colors.grey, height: 1.5),
               ),
               const SizedBox(height: 40),
 
               // New Password Field
-              const Text(
-                "New Password",
+               Text(
+                "New Password".tr,
                 style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
               ),
               const SizedBox(height: 8),
@@ -90,8 +90,8 @@ class UpdatePasswordScreen extends GetView<UpdatePasswordController> {
               const SizedBox(height: 24),
 
               // Confirm Password Field
-              const Text(
-                "Confirm New Password",
+               Text(
+                "Confirm New Password".tr,
                 style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
               ),
               const SizedBox(height: 8),
@@ -151,8 +151,8 @@ class UpdatePasswordScreen extends GetView<UpdatePasswordController> {
                     ),
                     child: controller.isLoading.value
                         ? const CircularProgressIndicator(color: Colors.white)
-                        : const Text(
-                            "Update Password",
+                        :  Text(
+                            "Update Password".tr,
                             style: TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.bold,

@@ -17,8 +17,8 @@ class BudgetScreen extends GetView<BudgetController> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        title: const Text(
-          "Monthly Budget",
+        title: Text(
+          "Monthly Budget".tr,
           style: TextStyle(color: Colors.black),
         ),
         centerTitle: true,
@@ -34,13 +34,13 @@ class BudgetScreen extends GetView<BudgetController> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              "Set Your Limit",
+             Text(
+              "Set Your Limit".tr,
               style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 10),
-            const Text(
-              "We will alert you when your estimated bill exceeds this amount.",
+             Text(
+              "We will alert you when your estimated bill exceeds this amount.".tr,
               style: TextStyle(color: Colors.grey, fontSize: 16),
             ),
             const SizedBox(height: 30),
@@ -48,7 +48,7 @@ class BudgetScreen extends GetView<BudgetController> {
               controller: textController,
               keyboardType: TextInputType.number,
               decoration: InputDecoration(
-                labelText: "Monthly Limit (EGP)",
+                labelText: "Monthly Limit (EGP)".tr,
                 prefixIcon: const Icon(Icons.attach_money),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
@@ -73,8 +73,8 @@ class BudgetScreen extends GetView<BudgetController> {
                     borderRadius: BorderRadius.circular(12),
                   ),
                 ),
-                child: const Text(
-                  "Save Budget",
+                child: Text(
+                  "Save Budget".tr,
                   style: TextStyle(fontSize: 18),
                 ),
               ),

@@ -17,8 +17,8 @@ class ForgotPasswordScreen extends GetView<ForgotPasswordController> {
           icon: const Icon(Icons.arrow_back, color: Colors.black),
           onPressed: () => Get.back(),
         ),
-        title: const Text(
-          "Forgot Password",
+        title: Text(
+          "Forgot Password".tr,
           style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
         ),
         centerTitle: true,
@@ -29,8 +29,8 @@ class ForgotPasswordScreen extends GetView<ForgotPasswordController> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const SizedBox(height: 30),
-            const Text(
-              "Reset Your Password",
+             Text(
+              "Reset Your Password".tr,
               style: TextStyle(
                 fontSize: 28,
                 fontWeight: FontWeight.w900,
@@ -38,20 +38,20 @@ class ForgotPasswordScreen extends GetView<ForgotPasswordController> {
               ),
             ),
             const SizedBox(height: 12),
-            const Text(
-              "Enter your registered email below, and we'll send you a link to reset your password.",
+             Text(
+              "Enter your registered email below, and we'll send you a link to reset your password.".tr,
               style: TextStyle(fontSize: 16, color: Colors.grey, height: 1.5),
             ),
             const SizedBox(height: 40),
-            const Text(
-              "Email Address",
+             Text(
+              "Email Address".tr,
               style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
             ),
             const SizedBox(height: 8),
             TextField(
               controller: controller.emailController,
               decoration: InputDecoration(
-                hintText: "Enter your email",
+                hintText: "Enter your email".tr,
                 hintStyle: const TextStyle(color: Colors.grey),
                 filled: true,
                 fillColor: Colors.grey.shade50,
@@ -88,8 +88,8 @@ class ForgotPasswordScreen extends GetView<ForgotPasswordController> {
                   ),
                   child: controller.isLoading.value
                       ? const CircularProgressIndicator(color: Colors.white)
-                      : const Text(
-                          "Send Reset Link",
+                      :  Text(
+                          "Send Reset Link".tr,
                           style: TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.bold,

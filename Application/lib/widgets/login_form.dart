@@ -17,7 +17,7 @@ class LoginForm extends GetView<LoginFormController> {
         // --- CHANGE 1: Using responsive fixed spacing instead of percentages ---
         SizedBox(height: sizeConfig.isMobile ? 20 : 30),
         Text(
-          'Welcome!',
+          'Welcome!'.tr,
           style: TextStyle(
             fontSize: sizeConfig.isMobile ? 28 : 36,
             fontWeight: FontWeight.bold,
@@ -26,7 +26,7 @@ class LoginForm extends GetView<LoginFormController> {
         ),
         SizedBox(height: sizeConfig.isMobile ? 8 : 12),
         Text(
-          "Sign in to continue",
+          "Sign in to continue".tr,
           style: TextStyle(
             fontSize: sizeConfig.isMobile ? 16 : 20,
             color: Colors.black54,
@@ -36,14 +36,14 @@ class LoginForm extends GetView<LoginFormController> {
         _buildTextField(
           cont: controller.mailController,
           sizeConfig: sizeConfig,
-          hintText: 'Email Address',
+          hintText: 'Email Address'.tr,
           prefixIcon: Icons.email_outlined,
         ),
         SizedBox(height: sizeConfig.isMobile ? 16 : 24),
         _buildTextField(
           cont: controller.passwordController,
           sizeConfig: sizeConfig,
-          hintText: 'Password',
+          hintText: 'Password'.tr,
           prefixIcon: Icons.lock_outline_rounded,
           obscureText: true,
         ),
@@ -55,7 +55,7 @@ class LoginForm extends GetView<LoginFormController> {
               Get.toNamed('forgot_password');
             },
             child: Text(
-              'Forgot Password?',
+              'Forgot Password?'.tr,
               style: TextStyle(
                 color: Colors.blue[700],
                 fontWeight: FontWeight.w600,
@@ -67,12 +67,12 @@ class LoginForm extends GetView<LoginFormController> {
         SizedBox(height: sizeConfig.isMobile ? 24 : 32),
         _buildLoginButton(context, sizeConfig),
         SizedBox(height: sizeConfig.isMobile ? 32 : 40),
-        const Row(
+         Row(
           children: [
             Expanded(child: Divider(color: Colors.grey)),
             Padding(
               padding: EdgeInsets.symmetric(horizontal: 10),
-              child: Text("OR", style: TextStyle(color: Colors.black54)),
+              child: Text("OR".tr, style: TextStyle(color: Colors.black54)),
             ),
             Expanded(child: Divider(color: Colors.grey)),
           ],
@@ -83,7 +83,7 @@ class LoginForm extends GetView<LoginFormController> {
           crossAxisAlignment: WrapCrossAlignment.center,
           children: [
             Text(
-              "Don't have an account?",
+              "Don't have an account?".tr,
               style: TextStyle(
                 color: Colors.black54,
                 fontSize: sizeConfig.isMobile ? 14 : 16,
@@ -94,7 +94,7 @@ class LoginForm extends GetView<LoginFormController> {
                 Get.toNamed('/register');
               },
               child: Text(
-                'Sign Up',
+                'Sign Up'.tr,
                 style: TextStyle(
                   color: Colors.blue[700],
                   fontWeight: FontWeight.bold,
@@ -162,15 +162,15 @@ class LoginForm extends GetView<LoginFormController> {
         } on AuthApiException catch (e) {
           if (e.code == 'email_not_confirmed') {
             Get.snackbar(
-              "Login Failed",
-              "Email not Confirmed",
+              "Login Failed".tr,
+              "Email not Confirmed".tr,
               backgroundColor: Colors.red,
               colorText: Colors.white,
             );
           } else if (e.code == 'invalid_credentials') {
             Get.snackbar(
-              "Login Failed",
-              "Invalid email or password",
+              "Login Failed".tr,
+              "Invalid email or password".tr,
               backgroundColor: Colors.red,
               colorText: Colors.white,
             );
@@ -199,7 +199,7 @@ class LoginForm extends GetView<LoginFormController> {
         ),
         child: Center(
           child: Text(
-            'Sign In',
+            'Sign In'.tr,
             style: TextStyle(
               color: Colors.white,
               fontWeight: FontWeight.bold,

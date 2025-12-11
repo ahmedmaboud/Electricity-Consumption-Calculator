@@ -75,20 +75,20 @@ class CalculatorPageController extends GetxController {
 
   bool validateInputs() {
     if (currentReadingController.text.isEmpty) {
-      Get.snackbar('Missing Data', 'Please enter the current reading!');
+      Get.snackbar('Missing Data'.tr, 'Please enter the current reading!'.tr);
       return false;
     }
     final current = int.tryParse(currentReadingController.text);
     final previous = lastDbReading.value ?? 0;
 
     if (current == null) {
-      Get.snackbar('Invalid Input', 'Please enter a valid number!');
+      Get.snackbar('Invalid Input'.tr, 'Please enter a valid number!'.tr);
       return false;
     }
     if (current < previous) {
       Get.snackbar(
-        'Error',
-        'Current reading cannot be less than previous reading!',
+        'Error'.tr,
+        'Current reading cannot be less than previous reading!'.tr,
         backgroundColor: Colors.red,
         colorText: Colors.white,
       );
@@ -103,8 +103,8 @@ class CalculatorPageController extends GetxController {
     final userId = _supabase.auth.currentUser?.id;
     if (userId == null) {
       Get.snackbar(
-        'Error',
-        'User not logged in.',
+        'Error'.tr,
+        'User not logged in.'.tr,
         backgroundColor: Colors.red,
         colorText: Colors.white,
       );
@@ -118,10 +118,8 @@ class CalculatorPageController extends GetxController {
 
     final consum = current - previous;
     final totalCost = calculateElectricity(current, previous);
-
-    cost.value = 'Total Bill: ${totalCost.toStringAsFixed(2)} EGP';
-    consumption.value = 'Consumption: ${consum.toStringAsFixed(0)} kWh';
-
+    cost.value = 'Total Bill: %s EGP'.trArgs([totalCost.toStringAsFixed(2)]);
+    consumption.value = 'Consumption: %s kWh'.trArgs([consum.toStringAsFixed(0)]);
     if (Get.isRegistered<BudgetController>()) {
       Get.find<BudgetController>().checkBudgetStatus(totalCost);
     }
@@ -138,8 +136,8 @@ class CalculatorPageController extends GetxController {
 
     if (success) {
       Get.snackbar(
-        'Success',
-        'Saved successfully!',
+        'Success'.tr,
+        'Saved successfully!'.tr,
         backgroundColor: Colors.green,
         colorText: Colors.white,
       );
@@ -166,8 +164,8 @@ class CalculatorPageController extends GetxController {
       currentReadingController.clear();
     } else {
       Get.snackbar(
-        'Error',
-        'Failed to save.',
+        'Error'.tr,
+        'Failed to save.'.tr,
         backgroundColor: Colors.red,
         colorText: Colors.white,
       );
@@ -205,8 +203,8 @@ class CalculatorPageController extends GetxController {
                   backgroundColor: Color(0xFFE3F2FD),
                   child: Icon(Icons.camera_alt, color: Color(0xFF1565C0)),
                 ),
-                title: const Text(
-                  "Take Photo",
+                title: Text(
+                  "Take Photo".tr,
                   style: TextStyle(fontWeight: FontWeight.w600),
                 ),
                 onTap: () async {
@@ -219,8 +217,8 @@ class CalculatorPageController extends GetxController {
                   backgroundColor: Color(0xFFE3F2FD),
                   child: Icon(Icons.photo_library, color: Color(0xFF1565C0)),
                 ),
-                title: const Text(
-                  "Choose from Gallery",
+                title: Text(
+                  "Choose from Gallery".tr,
                   style: TextStyle(fontWeight: FontWeight.w600),
                 ),
                 onTap: () async {
