@@ -17,7 +17,6 @@ class CalculatorPage extends GetView<CalculatorPageController> {
         title: Text(
           "Meter Reading",
           style: TextStyle(
-            color: Theme.of(context).textTheme.titleLarge?.color,
             fontWeight: FontWeight.bold,
           ),
         ),
