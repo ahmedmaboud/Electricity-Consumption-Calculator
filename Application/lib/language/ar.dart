@@ -165,6 +165,9 @@ const Map<String, String> ar = {
   'Cost Breakdown': 'تفاصيل التكلفة',
   'month':'شهر',
   'year':'سنة',
-
-
+  'Missing Fields': 'حقول مفقودة',
+  'Please fill in all fields': 'يرجى ملء جميع الحقول',
+  'Invalid Email': 'البريد الإلكتروني غير صالح',
+  'Weak Password': 'كلمة المرور ضعيفة',
+  'Password must be at least 6 characters long': 'يجب أن تكون كلمة المرور 6 أحرف على الأقل',
 };

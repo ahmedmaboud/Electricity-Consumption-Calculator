@@ -165,8 +165,9 @@ const Map<String, String> en = {
   'Cost Breakdown':'Cost Breakdown',
   'month':'Month',
   'year':'Year',
-
-
-  // 'Total Bill':'Total Bill',
-
+  'Missing Fields':'Missing Fields',
+  'Please fill in all fields':'Please fill in all fields',
+  'Invalid Email':'Invalid Email',
+  'Weak Password':'Weak Password',
+  'Password must be at least 6 characters long':'Password must be at least 6 characters long'
 };

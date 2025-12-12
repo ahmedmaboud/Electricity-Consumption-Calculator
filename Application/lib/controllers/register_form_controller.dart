@@ -22,8 +22,8 @@ class RegisterFormController extends GetxController {
   ) {
     if (name.isEmpty || email.isEmpty || pass.isEmpty || confirmPass.isEmpty) {
       Get.snackbar(
-        "Missing Fields",
-        "Please fill in all fields",
+        "Missing Fields".tr,
+        "Please fill in all fields".tr,
         backgroundColor: Colors.red,
         colorText: Colors.white,
         snackPosition: SnackPosition.TOP,
@@ -38,8 +38,8 @@ class RegisterFormController extends GetxController {
 
     if (!emailRegex.hasMatch(email)) {
       Get.snackbar(
-        "Invalid Email",
-        "Please enter a valid email address",
+        "Invalid Email".tr,
+        "Please enter a valid email address".tr,
         backgroundColor: Colors.red,
         colorText: Colors.white,
         snackPosition: SnackPosition.TOP,
@@ -48,12 +48,11 @@ class RegisterFormController extends GetxController {
     }
     return true;
   }
-
   bool validatePasswordLength(String pass) {
     if (pass.length < 6) {
       Get.snackbar(
-        "Weak Password",
-        "Password must be at least 6 characters long",
+        "Weak Password".tr,
+        "Password must be at least 6 characters long".tr,
         backgroundColor: Colors.red,
         colorText: Colors.white,
         snackPosition: SnackPosition.TOP,
@@ -62,7 +61,6 @@ class RegisterFormController extends GetxController {
     }
     return true;
   }
-
   bool validatePasswords(String pass, String confirmPass) {
     if (pass != confirmPass) {
       Get.snackbar(
