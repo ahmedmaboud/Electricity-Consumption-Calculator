@@ -81,10 +81,10 @@ class ProfileController extends GetxController {
 
   void deleteAccount() {
     Get.defaultDialog(
-      title: "Delete Account",
-      middleText: "Are you sure? This cannot be undone.",
-      textConfirm: "Delete",
-      textCancel: "Cancel",
+      title: "Delete Account".tr,
+      middleText: "Are you sure? This cannot be undone..".tr,
+      textConfirm: "Delete".tr,
+      textCancel: "Cancel".tr,
       confirmTextColor: Colors.white,
       buttonColor: Colors.red,
       onConfirm: () async {
@@ -94,7 +94,7 @@ class ProfileController extends GetxController {
           Get.offAllNamed('/login');
         } else {
           Get.back();
-          Get.snackbar("Error", "Failed to delete account.");
+          Get.snackbar("Error".tr, "Failed to delete account.".tr);
         }
       },
     );

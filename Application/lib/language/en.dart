@@ -142,9 +142,7 @@ const Map<String, String> en = {
   "KWH": "KWH",
   'Choose Avatar':'Choose Avatar',
   'date':'date',
-
-
-
-
+  'Are you sure? This cannot be undone..':'Are you sure? This cannot be undone..',
+  'Failed to delete account.':'Failed to delete account.',
 
 };

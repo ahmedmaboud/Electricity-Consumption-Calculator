@@ -16,8 +16,8 @@ class ProfileScreen extends GetView<ProfileController> {
         actions: [
           TextButton(
             onPressed: controller.saveSettings,
-            child: const Text(
-              'Save',
+            child: Text(
+              'Save'.tr,
               style: TextStyle(
                 color: Colors.blue,
                 fontSize: 16,
@@ -235,9 +235,7 @@ class ProfileScreen extends GetView<ProfileController> {
     );
   }
 }
-
 // --- Reusable Components (Stateless) ---
-
 class ProfileSection extends StatelessWidget {
   final List<Widget> children;
   const ProfileSection({super.key, required this.children});

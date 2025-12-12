@@ -81,32 +81,37 @@ class HistoryPage extends GetView<HistoryController> {
                         ),
                       ),
                       const SizedBox(height: 8),
-                      Row(
-                        children: [
-                          // Animated Switcher for smooth number transition
-                          AnimatedSwitcher(
+                    Row(
+                      children: [
+                        Flexible(
+                          child: AnimatedSwitcher(
                             duration: const Duration(milliseconds: 300),
                             child: Text(
-                                "${controller.totalConsumption.value} ${'KWH'.tr}",
+                              "${controller.totalConsumption.value} ${'KWH'.tr}",
                               key: ValueKey(controller.totalConsumption.value),
                               style: const TextStyle(
                                 fontSize: 28,
                                 fontWeight: FontWeight.bold,
                               ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
                             ),
                           ),
-                          const Spacer(),
-                          Text(
-                            "${controller.totalCost.value.toStringAsFixed(2)} ${'currency'.tr}",
-                            style: const TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                              color: Color(0xFF1976D2),
-                            ),
+                        ),
+
+                        const SizedBox(width: 12),
+
+                        Text(
+                          "${controller.totalCost.value.toStringAsFixed(2)} ${'currency'.tr}",
+                          style: const TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: Color(0xFF1976D2),
                           ),
-                        ],
-                      ),
-                      const SizedBox(height: 30),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 30),
                     ],
                   ),
                 ),
@@ -145,7 +150,7 @@ class HistoryPage extends GetView<HistoryController> {
                             context: context,
                             firstDate: DateTime(2020),
                             lastDate: DateTime.now(),
-                            locale: langController.isArabic.value ? Locale('ar', 'EG') : Locale('en', 'US'),                          );
+                          );
                           if (picked != null) {
                             controller.setDateRange(picked);
                           }

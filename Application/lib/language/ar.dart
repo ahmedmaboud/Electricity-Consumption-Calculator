@@ -91,7 +91,7 @@ const Map<String, String> ar = {
   'Current reading cannot be less than previous reading!': 'لا يمكن أن تكون القراءة الحالية أقل من السابقة!',
   'User not logged in.': 'المستخدم غير مسجل الدخول.',
   'Total Bill: %s EGP': 'إجمالي الفاتورة: %s جنيه',
-  'Consumption: %s kWh': 'الاستهلاك: %s كيلوواط ساعة',
+  'Consumption: %s kWh': 'الاستهلاك: %s ك.و.س',
   'Success': 'نجاح',
   'Saved successfully!': 'تم الحفظ بنجاح!',
   'Failed to save.': 'فشل الحفظ.',
@@ -139,8 +139,11 @@ const Map<String, String> ar = {
   'currency': 'جنيه',
   'Total For':'المجموع ل',
   'usage_summary': '@label\n@kwh كيلو وات\n@cost جنيه',
-  "KWH": "كيلووات/ساعة",
+  "KWH": 'ك.و.س',
   'months':'شهور',
   'Choose Avatar': 'اختر صورة شخصية',
   'date': 'التاريخ',
+  'Are you sure? This cannot be undone..':'هل أنت متأكد؟ هذا الإجراء لا يمكن التراجع عنه.',
+  'Failed to delete account.':'فشل في حذف الحساب.',
+
 };
