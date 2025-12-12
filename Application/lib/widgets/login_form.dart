@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../controllers/login_form_controller.dart';
 import '../utils/size_config.dart'; // Import SizeConfig for responsive sizing
+import 'dart:io';
 
 class LoginForm extends GetView<LoginFormController> {
   const LoginForm({super.key});
@@ -67,7 +68,7 @@ class LoginForm extends GetView<LoginFormController> {
         SizedBox(height: sizeConfig.isMobile ? 24 : 32),
         _buildLoginButton(context, sizeConfig),
         SizedBox(height: sizeConfig.isMobile ? 32 : 40),
-         Row(
+        Row(
           children: [
             Expanded(child: Divider(color: Colors.grey)),
             Padding(
@@ -150,55 +151,25 @@ class LoginForm extends GetView<LoginFormController> {
   Widget _buildLoginButton(BuildContext context, SizeConfig sizeConfig) {
     return GestureDetector(
       onTap: () async {
-        final email = controller.mailController.text.trim();
-        final password = controller.passwordController.text.trim();
-        if (email.isEmpty || password.isEmpty) {
-          if (email.isEmpty) {
-            Get.snackbar(
-              "Error",
-              "Email field cannot be empty",
-              backgroundColor: Colors.red,
-              colorText: Colors.white,
-            );
-          }
-
-          if (password.isEmpty) {
-            Get.snackbar(
-              "Error",
-              "Password field cannot be empty",
-              backgroundColor: Colors.red,
-              colorText: Colors.white,
-            );
-          }
-
-          return;
-        }
-
         try {
-          final success = await controller.login(
+          await controller.login(
             controller.mailController.text.trim(),
             controller.passwordController.text.trim(),
           );
-
-          if (success) {
-            Get.offAllNamed('/main_shell');
-          }
+        } on AuthRetryableFetchException catch (_) {
+          Get.snackbar(
+            "No Internet",
+            "Enable Wi-Fi/mobile data and try again.",
+          );
+        } on SocketException catch (_) {
+          Get.snackbar(
+            "No Internet",
+            "Enable Wi-Fi/mobile data and try again.",
+          );
         } on AuthApiException catch (e) {
-          if (e.code == 'email_not_confirmed') {
-            Get.snackbar(
-              "Login Failed".tr,
-              "Email not Confirmed".tr,
-              backgroundColor: Colors.red,
-              colorText: Colors.white,
-            );
-          } else if (e.code == 'invalid_credentials') {
-            Get.snackbar(
-              "Login Failed".tr,
-              "Invalid email or password".tr,
-              backgroundColor: Colors.red,
-              colorText: Colors.white,
-            );
-          }
+          Get.snackbar("Login Failed", e.message);
+        } catch (_) {
+          Get.snackbar("Login Failed", "Unexpected error. Try again.");
         }
       },
 

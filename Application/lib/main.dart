@@ -35,10 +35,12 @@ Future<void> main() async {
   await Supabase.initialize(
     url: 'https://lavpockbisipvcxkrwsy.supabase.co',
     anonKey:
-    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxhdnBvY2tiaXNpcHZjeGtyd3N5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5NTc4MTEsImV4cCI6MjA3NjUzMzgxMX0.UjoW6xeM9QmScS9JNjV_iP8DBYorlySpRuL4BsU_NhI',
+        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxhdnBvY2tiaXNpcHZjeGtyd3N5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5NTc4MTEsImV4cCI6MjA3NjUzMzgxMX0.UjoW6xeM9QmScS9JNjV_iP8DBYorlySpRuL4BsU_NhI',
   );
 
-  await UserSession().loadUserInfo();
+  try {
+    await UserSession().loadUserInfo();
+  } catch (_) {}
 
   await SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitDown,
@@ -59,7 +61,7 @@ class MyApp extends StatelessWidget {
     return GetMaterialApp(
       translations: AppTranslation(),
       locale: langCode != null ? Locale(langCode!) : Locale('en', 'US'),
-      fallbackLocale: Locale('en', 'US'), 
+      fallbackLocale: Locale('en', 'US'),
       initialBinding: BindingsBuilder(() {
         Get.put<SupabaseClient>(Supabase.instance.client);
         Get.put<AuthService>(AuthService());
@@ -75,7 +77,9 @@ class MyApp extends StatelessWidget {
           name: '/main_shell',
           page: () => MainShell(),
           binding: BindingsBuilder(() {
-            Get.lazyPut<CalculatorPageController>(() => CalculatorPageController());
+            Get.lazyPut<CalculatorPageController>(
+              () => CalculatorPageController(),
+            );
             Get.lazyPut<ProfileController>(() => ProfileController());
             Get.lazyPut<HistoryController>(() => HistoryController());
             Get.lazyPut<AnalyticsController>(() => AnalyticsController());
@@ -86,42 +90,44 @@ class MyApp extends StatelessWidget {
           name: '/login',
           page: () => LoginScreen(),
           binding: BindingsBuilder(
-                () => Get.lazyPut<LoginFormController>(() => LoginFormController()),
+            () => Get.lazyPut<LoginFormController>(() => LoginFormController()),
           ),
         ),
         GetPage(
           name: '/register',
           page: () => RegisterScreen(),
           binding: BindingsBuilder(
-                () => Get.lazyPut<RegisterFormController>(() => RegisterFormController()),
+            () => Get.lazyPut<RegisterFormController>(
+              () => RegisterFormController(),
+            ),
           ),
         ),
         GetPage(
           name: '/forgot_password',
           page: () => const ForgotPasswordScreen(),
           binding: BindingsBuilder(
-                () => Get.lazyPut(() => ForgotPasswordController()),
+            () => Get.lazyPut(() => ForgotPasswordController()),
           ),
         ),
         GetPage(
           name: '/update_password',
           page: () => const UpdatePasswordScreen(),
           binding: BindingsBuilder(
-                () => Get.lazyPut(() => UpdatePasswordController()),
+            () => Get.lazyPut(() => UpdatePasswordController()),
           ),
         ),
         GetPage(
           name: '/profile',
           page: () => const ProfileScreen(),
           binding: BindingsBuilder(
-                () => Get.lazyPut<ProfileController>(() => ProfileController()),
+            () => Get.lazyPut<ProfileController>(() => ProfileController()),
           ),
         ),
         GetPage(
           name: '/budget',
           page: () => const BudgetScreen(),
           binding: BindingsBuilder(
-                () => Get.lazyPut<BudgetController>(() => BudgetController()),
+            () => Get.lazyPut<BudgetController>(() => BudgetController()),
           ),
         ),
       ],

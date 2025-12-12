@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:graduation_project_depi/controllers/register_form_controller.dart';
 import '../utils/size_config.dart';
+import 'dart:io';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class RegisterForm extends GetView<RegisterFormController> {
   const RegisterForm({super.key});
@@ -137,30 +139,57 @@ class RegisterForm extends GetView<RegisterFormController> {
   Widget _buildRegisterButton(BuildContext context, SizeConfig sizeConfig) {
     return GestureDetector(
       onTap: () async {
-        final name = controller.nameController.text.trim();
         final mail = controller.emailController.text.trim();
         final pass = controller.passwordController.text.trim();
         final confirm = controller.confirmPasswordController.text.trim();
+        final name = controller.nameController.text.trim();
 
-        if (!controller.validateEmptyFields(name, mail, pass, confirm)) return;
-        if (!controller.validateEmailFormat(mail)) return;
-        if (!controller.validatePasswordLength(pass)) return;
         if (!controller.validatePasswords(pass, confirm)) return;
 
-        final success = await controller.signUp(mail, pass, name);
+        try {
+          final success = await controller.signUp(mail, pass, name);
 
-        if (success) {
+          if (success) {
+            Get.snackbar(
+              "Success",
+              "Registration Success, Confirm your email",
+              backgroundColor: Colors.blue.shade400,
+              colorText: Colors.white,
+            );
+            Get.offAllNamed('/login');
+          } else {
+            Get.snackbar(
+              "Error",
+              "Registration failed",
+              backgroundColor: Colors.red,
+              colorText: Colors.white,
+            );
+          }
+        } on AuthRetryableFetchException {
           Get.snackbar(
-            "Success".tr,
-            "Registration Success, Confirm your email".tr,
-            backgroundColor: Colors.blue.shade400,
+            "No Internet",
+            "Please enable Wi-Fi/mobile data and try again.",
+            backgroundColor: Colors.red,
             colorText: Colors.white,
           );
-          Get.offAllNamed('/login');
-        } else {
+        } on SocketException {
           Get.snackbar(
-            "Error".tr,
-            "Registration failed".tr,
+            "No Internet",
+            "Please enable Wi-Fi/mobile data and try again.",
+            backgroundColor: Colors.red,
+            colorText: Colors.white,
+          );
+        } on AuthApiException catch (e) {
+          Get.snackbar(
+            "Error",
+            e.message,
+            backgroundColor: Colors.red,
+            colorText: Colors.white,
+          );
+        } catch (_) {
+          Get.snackbar(
+            "Error",
+            "Unexpected error. Try again.",
             backgroundColor: Colors.red,
             colorText: Colors.white,
           );

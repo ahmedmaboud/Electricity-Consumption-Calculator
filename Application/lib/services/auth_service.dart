@@ -1,6 +1,7 @@
 import 'package:get/get.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../user_session.dart';
+import 'dart:io';
 
 class AuthService {
   final cloud = Get.find<SupabaseClient>();
@@ -15,7 +16,12 @@ class AuthService {
       if (event == AuthChangeEvent.passwordRecovery) {
         Get.toNamed('/update_password');
       } else if (event == AuthChangeEvent.signedIn) {
-        await UserSession().loadUserInfo();
+        try {
+          await UserSession().loadUserInfo();
+        } catch (e) {
+          print("Signed in, but loadUserInfo failed: $e");
+        }
+
         Get.offAllNamed('/main_shell');
       }
     });
@@ -26,7 +32,6 @@ class AuthService {
       final authResponse = await cloud.auth.signUp(
         email: email,
         password: password,
-        emailRedirectTo: 'io.supabase.flutter://login-callback',
       );
 
       final authUser = authResponse.user;
@@ -39,24 +44,36 @@ class AuthService {
 
       await UserSession().loadUserInfo();
       return true;
+    } on AuthRetryableFetchException {
+      rethrow;
+    } on SocketException {
+      rethrow;
     } catch (e) {
       print('Register error: $e');
       return false;
     }
   }
 
-  Future<bool> login(String mail, String password) async {
+  Future<bool> login(String email, String password) async {
     try {
-      final response = await cloud.auth.signInWithPassword(
-        email: mail,
-        password: password,
-      );
-      if (response.user == null) return false;
-      await UserSession().loadUserInfo();
+      await cloud.auth.signInWithPassword(email: email, password: password);
+
+      try {
+        await UserSession().loadUserInfo();
+      } catch (e) {
+        print("Profile load failed after login: $e");
+      }
+
       return true;
-    } catch (e) {
-      print("LOGIN ERROR: $e");
+    } on AuthRetryableFetchException {
       rethrow;
+    } on SocketException {
+      rethrow;
+    } on AuthApiException {
+      rethrow;
+    } catch (e) {
+      print("Login error: $e");
+      return false;
     }
   }
 
