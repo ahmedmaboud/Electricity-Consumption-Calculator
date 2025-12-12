@@ -88,8 +88,8 @@ class BudgetController extends GetxController {
 
       if (newBillAmount > 0) {
         Get.snackbar(
-          'Budget Alert!',
-          'You have exceeded your monthly limit! Total: ${totalProjected.toStringAsFixed(2)} EGP',
+          'Budget Alert!'.tr,
+          'You have exceeded your monthly limit! Total: %s'.trArgs([totalProjected.toStringAsFixed(2) + ' ' + 'currency'.tr]),
           backgroundColor: Colors.red,
           colorText: Colors.white,
           icon: const Icon(Icons.warning, color: Colors.white),

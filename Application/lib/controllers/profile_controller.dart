@@ -53,16 +53,16 @@ class ProfileController extends GetxController {
       UserSession().currentUser!.avatar = tempAvatar.value;
 
       Get.snackbar(
-        "Success",
-        "Profile updated successfully!",
+        "Success".tr,
+        "Profile updated successfully!".tr,
         backgroundColor: Colors.green.shade400,
         colorText: Colors.white,
         snackPosition: SnackPosition.BOTTOM,
       );
     } else {
       Get.snackbar(
-        "Error",
-        "Failed to save changes. Please try again.",
+        "Error".tr,
+        "Failed to save changes. Please try again.".tr,
         backgroundColor: Colors.red,
         colorText: Colors.white,
         snackPosition: SnackPosition.BOTTOM,

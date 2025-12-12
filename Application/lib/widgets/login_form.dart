@@ -150,6 +150,30 @@ class LoginForm extends GetView<LoginFormController> {
   Widget _buildLoginButton(BuildContext context, SizeConfig sizeConfig) {
     return GestureDetector(
       onTap: () async {
+        final email = controller.mailController.text.trim();
+        final password = controller.passwordController.text.trim();
+        if (email.isEmpty || password.isEmpty) {
+          if (email.isEmpty) {
+            Get.snackbar(
+              "Error",
+              "Email field cannot be empty",
+              backgroundColor: Colors.red,
+              colorText: Colors.white,
+            );
+          }
+
+          if (password.isEmpty) {
+            Get.snackbar(
+              "Error",
+              "Password field cannot be empty",
+              backgroundColor: Colors.red,
+              colorText: Colors.white,
+            );
+          }
+
+          return;
+        }
+
         try {
           final success = await controller.login(
             controller.mailController.text.trim(),

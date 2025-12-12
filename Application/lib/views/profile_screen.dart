@@ -297,7 +297,7 @@ class ProfileItem extends StatelessWidget {
             if (value != null)
               Text(
                 value!,
-                style: TextStyle(fontSize: 15, color: Colors.grey[600]),
+                style: TextStyle(fontSize: 12, color: Colors.grey[600]),
               ),
             if (hasNavigation) ...[
               if (value != null) const SizedBox(width: 8),

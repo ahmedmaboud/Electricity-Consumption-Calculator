@@ -2,30 +2,26 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_mlkit_text_recognition/google_mlkit_text_recognition.dart';
-import 'package:graduation_project_depi/controllers/analytics_page_controller.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:graduation_project_depi/entities/reading.dart';
-import 'package:graduation_project_depi/services/electricity_reading_service.dart';
-import 'package:speech_to_text/speech_to_text.dart'
-    as stt; // Import Speech To Text
+import 'package:speech_to_text/speech_to_text.dart' as stt;
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-import 'history_controller.dart';
-import 'budget_controller.dart';
+import 'package:graduation_project_depi/controllers/analytics_page_controller.dart';
+import 'package:graduation_project_depi/controllers/history_controller.dart';
+import 'package:graduation_project_depi/controllers/budget_controller.dart';
+import 'package:graduation_project_depi/services/electricity_reading_service.dart';
+import 'package:graduation_project_depi/entities/reading.dart';
 
 class CalculatorPageController extends GetxController {
   final _readingService = Get.find<ElectricityReadingService>();
   final _supabase = Get.find<SupabaseClient>();
 
   final currentReadingController = TextEditingController();
-
   final cost = ''.obs;
   final consumption = ''.obs;
   final isLoading = false.obs;
   final lastDbReading = Rxn<int>();
-
   final picker = ImagePicker();
-
   final stt.SpeechToText _speech = stt.SpeechToText();
   final isListening = false.obs;
 
@@ -40,7 +36,7 @@ class CalculatorPageController extends GetxController {
     if (userId != null) {
       final reading = await _readingService.getLatestReading(userId);
       if (reading != null) {
-        lastDbReading.value = reading.meterValue;
+        lastDbReading.value = (reading.meterValue as num).toInt();
       } else {
         lastDbReading.value = 0;
       }
@@ -74,7 +70,6 @@ class CalculatorPageController extends GetxController {
       rate = 1.45;
       serviceFee = 15;
     }
-
     return (reading * rate) + serviceFee;
   }
 
@@ -91,12 +86,7 @@ class CalculatorPageController extends GetxController {
       return false;
     }
     if (current < previous) {
-      Get.snackbar(
-        'Error'.tr,
-        'Current reading cannot be less than previous reading!'.tr,
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
-      );
+      Get.snackbar('Error'.tr, 'Current reading cannot be less than previous reading!'.tr, backgroundColor: Colors.red, colorText: Colors.white);
       return false;
     }
     return true;
@@ -107,24 +97,20 @@ class CalculatorPageController extends GetxController {
 
     final userId = _supabase.auth.currentUser?.id;
     if (userId == null) {
-      Get.snackbar(
-        'Error'.tr,
-        'User not logged in.'.tr,
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
-      );
+      Get.snackbar('Error'.tr, 'User not logged in.'.tr, backgroundColor: Colors.red, colorText: Colors.white);
       return;
     }
 
     isLoading.value = true;
-
     final current = int.parse(currentReadingController.text);
     final previous = lastDbReading.value ?? 0;
-
     final consum = current - previous;
     final totalCost = calculateElectricity(current, previous);
+
     cost.value = 'Total Bill: %s EGP'.trArgs([totalCost.toStringAsFixed(2)]);
-    consumption.value = 'Consumption: %s kWh'.trArgs([consum.toStringAsFixed(0)]);
+    consumption.value = 'Consumption: %s KWH'.trArgs([consum.toStringAsFixed(0)]);
+
+
     if (Get.isRegistered<BudgetController>()) {
       Get.find<BudgetController>().checkBudgetStatus(totalCost);
     }
@@ -139,26 +125,15 @@ class CalculatorPageController extends GetxController {
     bool success = await _readingService.insertReading(newReading);
 
     if (success) {
-      Get.snackbar(
-        'Success'.tr,
-        'Saved successfully!'.tr,
-        backgroundColor: Colors.green,
-        colorText: Colors.white,
-      );
+      Get.snackbar('Success'.tr, 'Saved successfully!'.tr, backgroundColor: Colors.green, colorText: Colors.white);
 
       if (Get.isRegistered<HistoryController>()) {
         Get.find<HistoryController>().addLocalReading(newReading, consum);
       }
 
-      final double kwhDouble = consum.toDouble();
-      final DateTime timestamp = newReading.createdAt ?? DateTime.now();
       try {
         if (Get.isRegistered<AnalyticsController>()) {
-          Get.find<AnalyticsController>().updateFromConsumption(
-            kwhDouble,
-            totalCost,
-            timestamp,
-          );
+          Get.find<AnalyticsController>().refreshData();
         }
       } catch (e) {
         debugPrint('Analytics error: $e');
@@ -167,12 +142,7 @@ class CalculatorPageController extends GetxController {
       lastDbReading.value = current;
       currentReadingController.clear();
     } else {
-      Get.snackbar(
-        'Error'.tr,
-        'Failed to save.'.tr,
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
-      );
+      Get.snackbar('Error'.tr, 'Failed to save.'.tr, backgroundColor: Colors.red, colorText: Colors.white);
     }
 
     isLoading.value = false;
@@ -181,42 +151,24 @@ class CalculatorPageController extends GetxController {
   Future<void> startVoiceInput() async {
     if (!isListening.value) {
       bool available = await _speech.initialize(
-        onError: (val) {
-          print('onError: $val');
-          isListening.value = false;
-        },
+        onError: (val) => isListening.value = false,
         onStatus: (val) {
-          print('onStatus: $val');
-          if (val == 'done' || val == 'notListening') {
-            isListening.value = false;
-          }
+          if (val == 'done' || val == 'notListening') isListening.value = false;
         },
       );
-
       if (available) {
         isListening.value = true;
         _speech.listen(
           onResult: (result) {
-            String recognizedWords = result.recognizedWords;
-            final numbers = RegExp(
-              r'\d+',
-            ).allMatches(recognizedWords).map((m) => m.group(0)).join("");
-
-            if (numbers.isNotEmpty) {
-              currentReadingController.text = numbers;
-            }
+            final numbers = RegExp(r'\d+').allMatches(result.recognizedWords).map((m) => m.group(0)).join("");
+            if (numbers.isNotEmpty) currentReadingController.text = numbers;
           },
           localeId: 'ar_EG',
           listenFor: const Duration(seconds: 15),
           pauseFor: const Duration(seconds: 3),
         );
       } else {
-        Get.snackbar(
-          "Error",
-          "Speech recognition not available",
-          backgroundColor: Colors.red,
-          colorText: Colors.white,
-        );
+        Get.snackbar("Error".tr, "Speech recognition not available".tr, backgroundColor: Colors.red, colorText: Colors.white);
       }
     } else {
       isListening.value = false;
@@ -224,58 +176,27 @@ class CalculatorPageController extends GetxController {
     }
   }
 
-  // --- Image OCR Logic ---
-  Future<void> scanForField(
-    TextEditingController target,
-    BuildContext context,
-  ) async {
+  Future<void> scanForField(TextEditingController target, BuildContext context) async {
     showModalBottomSheet(
       context: context,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
       builder: (_) {
         return SafeArea(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               const SizedBox(height: 10),
-              Container(
-                width: 40,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: Colors.grey[300],
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
+              Container(width: 40, height: 4, decoration: BoxDecoration(color: Colors.grey[300], borderRadius: BorderRadius.circular(2))),
               const SizedBox(height: 20),
               ListTile(
-                leading: const CircleAvatar(
-                  backgroundColor: Color(0xFFE3F2FD),
-                  child: Icon(Icons.camera_alt, color: Color(0xFF1565C0)),
-                ),
-                title: Text(
-                  "Take Photo".tr,
-                  style: TextStyle(fontWeight: FontWeight.w600),
-                ),
-                onTap: () async {
-                  Get.back();
-                  await runOCR(target, ImageSource.camera);
-                },
+                leading: const CircleAvatar(backgroundColor: Color(0xFFE3F2FD), child: Icon(Icons.camera_alt, color: Color(0xFF1565C0))),
+                title:  Text("Take Photo".tr, style: TextStyle(fontWeight: FontWeight.w600)),
+                onTap: () async { Get.back(); await runOCR(target, ImageSource.camera); },
               ),
               ListTile(
-                leading: const CircleAvatar(
-                  backgroundColor: Color(0xFFE3F2FD),
-                  child: Icon(Icons.photo_library, color: Color(0xFF1565C0)),
-                ),
-                title: Text(
-                  "Choose from Gallery".tr,
-                  style: TextStyle(fontWeight: FontWeight.w600),
-                ),
-                onTap: () async {
-                  Get.back();
-                  await runOCR(target, ImageSource.gallery);
-                },
+                leading: const CircleAvatar(backgroundColor: Color(0xFFE3F2FD), child: Icon(Icons.photo_library, color: Color(0xFF1565C0))),
+                title: Text("Choose from Gallery".tr, style: TextStyle(fontWeight: FontWeight.w600)),
+                onTap: () async { Get.back(); await runOCR(target, ImageSource.gallery); },
               ),
               const SizedBox(height: 20),
             ],
@@ -304,30 +225,15 @@ class CalculatorPageController extends GetxController {
       await recognizer.close();
       isLoading.value = false;
       if (numbers.isEmpty) {
-        Get.snackbar(
-          "Error",
-          "No numbers found in image!",
-          backgroundColor: Colors.orange,
-          colorText: Colors.white,
-        );
+        Get.snackbar("Error".tr, "No numbers found!".tr, backgroundColor: Colors.orange, colorText: Colors.white);
         return;
       }
       numbers.sort();
       target.text = numbers.last.toString();
-      Get.snackbar(
-        "Done",
-        "Number extracted: ${numbers.last}",
-        backgroundColor: Colors.green,
-        colorText: Colors.white,
-      );
+      Get.snackbar("Done".tr, "Number extracted: %s".trArgs([numbers.last.toString()]), backgroundColor: Colors.green, colorText: Colors.white);
     } catch (e) {
       isLoading.value = false;
-      Get.snackbar(
-        "Error",
-        "Failed to scan image: $e",
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
-      );
+      Get.snackbar("Error".tr,  "Failed to scan image: %s".trArgs([e.toString()]), backgroundColor: Colors.red, colorText: Colors.white);
     }
   }
 }

@@ -8,6 +8,6 @@ class HistoryItem {
     required this.consumption,
     required this.cost,
     required this.date,
-    required this.dateRange,
+    required this.dateRange, int? id,
   });
 }
