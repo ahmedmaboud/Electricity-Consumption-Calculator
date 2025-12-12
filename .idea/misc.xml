@@ -1,5 +1,9 @@
 <project version="4">
+<<<<<<< HEAD
+  <component name="ProjectRootManager">
+=======
   <component name="ProjectRootManager" version="2" languageLevel="JDK_24" project-jdk-name="Android API 36.0, extension level 17 Platform" project-jdk-type="Android SDK">
+>>>>>>> 9ffc742085e1f1f4351ced11c8bc660b84bb59d4
     <output url="file://$PROJECT_DIR$/out" />
   </component>
 </project>
