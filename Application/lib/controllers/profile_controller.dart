@@ -4,12 +4,17 @@ import 'package:graduation_project_depi/entities/user_profile.dart';
 import 'package:graduation_project_depi/services/auth_service.dart';
 import 'package:graduation_project_depi/services/profile_service.dart'; // Import Service
 import 'package:graduation_project_depi/user_session.dart';
+import 'package:graduation_project_depi/controllers/theme_controller.dart';
 
 class ProfileController extends GetxController {
   final _profileService = ProfileService(); // Use the service
+  ThemeController get themeController => Get.find<ThemeController>();
 
   final pushNotifications = true.obs;
-  final darkMode = false.obs;
+
+    bool get darkMode => themeController.isDarkMode.value;
+
+  
 
   late UserProfile? currentUser;
 
@@ -70,9 +75,12 @@ class ProfileController extends GetxController {
     }
   }
 
-  void toggleNotifications(bool value) => pushNotifications.value = value;
-  void toggleDarkMode(bool value) => darkMode.value = value;
-
+   void toggleNotifications(bool value) => pushNotifications.value = value;
+  void toggleDarkMode(bool value) {
+    if (value != themeController.isDarkMode.value) {
+      themeController.toggleTheme();
+    }
+  }
   void logout() {
     final service = Get.find<AuthService>();
     service.logout();

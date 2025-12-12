@@ -68,9 +68,15 @@ class _MainShellState extends State<MainShell> {
     return Scaffold(
       body: IndexedStack(index: _selectedIndex, children: _pages),
       bottomNavigationBar: Container(
-        decoration: BoxDecoration(
-          color: Colors.white,
-          boxShadow: [BoxShadow(blurRadius: 12, color: Colors.black12, offset: Offset(0, -3))],
+        decoration: BoxDecoration( color: Theme.of(context).cardColor,
+          boxShadow: [
+            BoxShadow(
+              blurRadius: 12,
+              color: Theme.of(context).brightness == Brightness.dark
+                  ? Colors.black.withOpacity(0.5)
+                  : Colors.black12,
+              offset: const Offset(0, -3),
+        )],
         ),
         child: SafeArea(
           child: ClipRRect(
@@ -79,8 +85,11 @@ class _MainShellState extends State<MainShell> {
               currentIndex: _selectedIndex,
               onTap: _onItemTapped,
               type: BottomNavigationBarType.fixed,
-              selectedItemColor: const Color(0xFF1976D2),
-              unselectedItemColor: Colors.grey,
+              backgroundColor: Theme.of(context).cardColor,
+              selectedItemColor: Theme.of(context).primaryColor,
+              unselectedItemColor: Theme.of(context).brightness == Brightness.dark
+                  ? Colors.grey[400]
+                  : Colors.grey,
               showUnselectedLabels: true,
               items: [
                 BottomNavigationBarItem(icon: Icon(Icons.home_outlined), activeIcon: Icon(Icons.home), label: 'Home'.tr),

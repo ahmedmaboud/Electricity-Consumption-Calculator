@@ -17,12 +17,12 @@ class HistoryPage extends GetView<HistoryController> {
     }
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF9FAFB),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         title: Text(
           "Consumption History".tr,
           style: TextStyle(
-            color: Colors.black,
+            color: Theme.of(context).textTheme.titleLarge?.color,
             fontWeight: FontWeight.bold,
             fontSize: 18,
           ),
@@ -58,11 +58,13 @@ class HistoryPage extends GetView<HistoryController> {
                   width: double.infinity,
                   padding: const EdgeInsets.all(24),
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: Theme.of(context).cardColor,
                     borderRadius: BorderRadius.circular(20),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.03),
+                        color: Theme.of(context).brightness == Brightness.dark
+                            ? Colors.black.withOpacity(0.3)
+                            : Colors.black.withOpacity(0.03),
                         blurRadius: 10,
                         offset: const Offset(0, 4),
                       ),
@@ -74,44 +76,49 @@ class HistoryPage extends GetView<HistoryController> {
                       Text(
                         controller.selectedDateRange.value != null
                             ? "Selected Range Total".tr
-                            :"${'Total For'.tr} (${controller.selectedTab.value.tr})",
-                        style: const TextStyle(
-                          color: Colors.grey,
+                            : "${'Total For'.tr} (${controller.selectedTab.value.tr})",
+                        style: TextStyle(
+                          color: Theme.of(context).textTheme.bodySmall?.color,
                           fontSize: 14,
                         ),
                       ),
                       const SizedBox(height: 8),
-                    Row(
-                      children: [
-                        Flexible(
-                          child: AnimatedSwitcher(
-                            duration: const Duration(milliseconds: 300),
-                            child: Text(
-                              "${controller.totalConsumption.value} ${'KWH'.tr}",
-                              key: ValueKey(controller.totalConsumption.value),
-                              style: const TextStyle(
-                                fontSize: 28,
-                                fontWeight: FontWeight.bold,
+                      Row(
+                        children: [
+                          Flexible(
+                            child: AnimatedSwitcher(
+                              duration: const Duration(milliseconds: 300),
+                              child: Text(
+                                "${controller.totalConsumption.value} ${'KWH'.tr}",
+                                key: ValueKey(
+                                  controller.totalConsumption.value,
+                                ),
+                                style: TextStyle(
+                                  fontSize: 28,
+                                  fontWeight: FontWeight.bold,
+                                  color: Theme.of(
+                                    context,
+                                  ).textTheme.titleLarge?.color,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
                               ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
                             ),
                           ),
-                        ),
 
-                        const SizedBox(width: 12),
+                          const SizedBox(width: 12),
 
-                        Text(
-                          "${controller.totalCost.value.toStringAsFixed(2)} ${'currency'.tr}",
-                          style: const TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            color: Color(0xFF1976D2),
+                          Text(
+                            "${controller.totalCost.value.toStringAsFixed(2)} ${'currency'.tr}",
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              color: Theme.of(context).primaryColor,
+                            ),
                           ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 30),
+                        ],
+                      ),
+                      const SizedBox(height: 30),
                     ],
                   ),
                 ),
@@ -120,10 +127,17 @@ class HistoryPage extends GetView<HistoryController> {
                 Container(
                   padding: const EdgeInsets.all(4),
                   decoration: BoxDecoration(
-                    color: Colors.grey[200],
+                    color: Theme.of(context).brightness == Brightness.dark
+                        ? Colors.grey[800]
+                        : Colors.grey[200],
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  child: Row(children: [_buildTab("Month".tr), _buildTab("Year".tr)]),
+                  child: Row(
+                    children: [
+                      _buildTab(context, "Month"),
+                      _buildTab(context, "Year"),
+                    ],
+                  ),
                 ),
 
                 const SizedBox(height: 20),
@@ -133,6 +147,8 @@ class HistoryPage extends GetView<HistoryController> {
                   children: [
                     Expanded(
                       child: _buildFilterButton(
+                        context: context,
+
                         icon: Icons.swap_vert,
                         label: controller.isNewestFirst.value
                             ? "${'Sort'.tr}: ${'Newest'.tr}"
@@ -143,6 +159,8 @@ class HistoryPage extends GetView<HistoryController> {
                     const SizedBox(width: 12),
                     Expanded(
                       child: _buildFilterButton(
+                        context: context,
+
                         icon: Icons.calendar_today,
                         label: "Filter Date".tr,
                         onTap: () async {
@@ -168,7 +186,11 @@ class HistoryPage extends GetView<HistoryController> {
                       ? Center(
                           child: Text(
                             "No readings found for this period.".tr,
-                            style: TextStyle(color: Colors.grey[400]),
+                            style: TextStyle(
+                              color: Theme.of(
+                                context,
+                              ).textTheme.bodySmall?.color,
+                            ),
                           ),
                         )
                       : ListView.separated(
@@ -177,7 +199,7 @@ class HistoryPage extends GetView<HistoryController> {
                               const SizedBox(height: 12),
                           itemBuilder: (context, index) {
                             final item = controller.historyItems[index];
-                            return _buildHistoryItem(item);
+                            return _buildHistoryItem(context,item);
                           },
                         ),
                 ),
@@ -188,13 +210,15 @@ class HistoryPage extends GetView<HistoryController> {
       }),
     );
   }
+
   void _showDeleteConfirmation(BuildContext context) {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
         title: Text("Reset History".tr),
         content: Text(
-          "Are you sure you want to delete ALL reading history? This action cannot be undone.".tr,
+          "Are you sure you want to delete ALL reading history? This action cannot be undone."
+              .tr,
         ),
         actions: [
           TextButton(
@@ -206,16 +230,14 @@ class HistoryPage extends GetView<HistoryController> {
               Get.back();
               controller.clearHistory();
             },
-            child: Text(
-              "Delete All".tr,
-              style: TextStyle(color: Colors.red),
-            ),
+            child: Text("Delete All".tr, style: TextStyle(color: Colors.red)),
           ),
         ],
       ),
     );
   }
-  Widget _buildTab(String text) {
+
+  Widget _buildTab(BuildContext context, String text) {
     final isSelected = controller.selectedTab.value == text;
     return Expanded(
       child: GestureDetector(
@@ -224,12 +246,16 @@ class HistoryPage extends GetView<HistoryController> {
           duration: const Duration(milliseconds: 200),
           padding: const EdgeInsets.symmetric(vertical: 10),
           decoration: BoxDecoration(
-            color: isSelected ? Colors.white : Colors.transparent,
+            color: isSelected
+                ? Theme.of(context).cardColor
+                : Colors.transparent,
             borderRadius: BorderRadius.circular(10),
             boxShadow: isSelected
                 ? [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.05),
+                      color: Theme.of(context).brightness == Brightness.dark
+                          ? Colors.black.withOpacity(0.3)
+                          : Colors.black.withOpacity(0.05),
                       blurRadius: 4,
                     ),
                   ]
@@ -240,7 +266,9 @@ class HistoryPage extends GetView<HistoryController> {
               text,
               style: TextStyle(
                 fontWeight: FontWeight.w600,
-                color: isSelected ? Colors.black : Colors.grey[600],
+                color: isSelected
+                    ? Theme.of(context).textTheme.titleMedium?.color
+                    : Theme.of(context).textTheme.bodySmall?.color,
               ),
             ),
           ),
@@ -250,6 +278,8 @@ class HistoryPage extends GetView<HistoryController> {
   }
 
   Widget _buildFilterButton({
+    required BuildContext context,
+
     required IconData icon,
     required String label,
     required VoidCallback onTap,
@@ -260,18 +290,30 @@ class HistoryPage extends GetView<HistoryController> {
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 12),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: Theme.of(context).cardColor,
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: Colors.grey[200]!),
+          border: Border.all(
+            color: Theme.of(context).brightness == Brightness.dark
+                ? Colors.grey[800]!
+                : Colors.grey[200]!,
+          ),
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(icon, size: 16, color: Colors.black87),
+            Icon(
+              icon,
+              size: 16,
+              color: Theme.of(context).textTheme.bodyLarge?.color,
+            ),
             const SizedBox(width: 6),
             Text(
               label,
-              style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+                color: Theme.of(context).textTheme.bodyLarge?.color,
+              ),
             ),
           ],
         ),
@@ -279,23 +321,33 @@ class HistoryPage extends GetView<HistoryController> {
     );
   }
 
-  Widget _buildHistoryItem(HistoryItem item) {
+  Widget _buildHistoryItem(BuildContext context, HistoryItem item) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.grey[100]!),
+        border: Border.all(
+          color: isDark ? Colors.grey[800]! : Colors.grey[100]!,
+        ),
       ),
       child: Row(
         children: [
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: const Color(0xFFE3F2FD),
+              color: isDark
+                  ? Theme.of(context).primaryColor.withOpacity(0.2)
+                  : const Color(0xFFE3F2FD),
               borderRadius: BorderRadius.circular(12),
             ),
-            child: const Icon(Icons.bolt, color: Color(0xFF1976D2), size: 24),
+            child: Icon(
+              Icons.bolt,
+              color: Theme.of(context).primaryColor,
+              size: 24,
+            ),
           ),
           const SizedBox(width: 16),
           Expanded(
@@ -304,22 +356,30 @@ class HistoryPage extends GetView<HistoryController> {
               children: [
                 Text(
                   "${item.consumption} ${'KWH'.tr}",
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 16,
+                    color: Theme.of(context).textTheme.titleMedium?.color,
                   ),
                 ),
                 const SizedBox(height: 4),
                 Text(
                   item.dateRange,
-                  style: TextStyle(color: Colors.grey[500], fontSize: 13),
+                  style: TextStyle(
+                    color: Theme.of(context).textTheme.bodySmall?.color,
+                    fontSize: 13,
+                  ),
                 ),
               ],
             ),
           ),
           Text(
             "${item.cost.toStringAsFixed(2)} ${'currency'.tr}",
-            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 16,
+              color: Theme.of(context).textTheme.titleMedium?.color,
+            ),
           ),
         ],
       ),

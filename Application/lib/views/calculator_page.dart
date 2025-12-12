@@ -12,7 +12,7 @@ class CalculatorPage extends GetView<CalculatorPageController> {
     final budgetController = Get.find<BudgetController>();
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F5F5),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         title: Text(
           "Meter Reading".tr,
@@ -36,11 +36,13 @@ class CalculatorPage extends GetView<CalculatorPageController> {
                   horizontal: 20,
                 ),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: Theme.of(context).cardColor,
                   borderRadius: BorderRadius.circular(16),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.05),
+                      color: Theme.of(context).brightness == Brightness.dark
+                          ? Colors.black.withOpacity(0.3)
+                          : Colors.black.withOpacity(0.05),
                       blurRadius: 10,
                       offset: const Offset(0, 4),
                     ),
@@ -61,12 +63,12 @@ class CalculatorPage extends GetView<CalculatorPageController> {
                       ),
                     ),
                     const SizedBox(width: 16),
-                     Text(
+                    Text(
                       "Electricity".tr,
                       style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
-                        color: Colors.black87,
+                        color: Theme.of(context).textTheme.titleLarge?.color,
                       ),
                     ),
                   ],
@@ -80,6 +82,7 @@ class CalculatorPage extends GetView<CalculatorPageController> {
                 final budget = budgetController.monthlyLimit.value;
                 final isSet = budget > 0;
                 final isOver = budgetController.isOverBudget.value;
+                final isDark = Theme.of(context).brightness == Brightness.dark;
 
                 return GestureDetector(
                   onTap: () => Get.toNamed('/budget'),
@@ -90,12 +93,22 @@ class CalculatorPage extends GetView<CalculatorPageController> {
                       horizontal: 20,
                     ),
                     decoration: BoxDecoration(
-                      color: isOver ? Colors.red.shade50 : Colors.green.shade50,
+                      color: isOver
+                          ? (isDark
+                                ? Colors.red.shade900.withOpacity(0.3)
+                                : Colors.red.shade50)
+                          : (isDark
+                                ? Colors.green.shade900.withOpacity(0.3)
+                                : Colors.green.shade50),
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(
                         color: isOver
-                            ? Colors.red.shade200
-                            : Colors.green.shade200,
+                            ? (isDark
+                                  ? Colors.red.shade700
+                                  : Colors.red.shade200)
+                            : (isDark
+                                  ? Colors.green.shade700
+                                  : Colors.green.shade200),
                       ),
                     ),
                     child: Row(
@@ -116,7 +129,9 @@ class CalculatorPage extends GetView<CalculatorPageController> {
                                   "Monthly Limit".tr,
                                   style: TextStyle(
                                     fontSize: 12,
-                                    color: Colors.grey[700],
+                                    color: Theme.of(
+                                      context,
+                                    ).textTheme.bodySmall?.color,
                                     fontWeight: FontWeight.w500,
                                   ),
                                 ),
@@ -128,7 +143,11 @@ class CalculatorPage extends GetView<CalculatorPageController> {
                                   style: TextStyle(
                                     fontSize: 16,
                                     fontWeight: FontWeight.bold,
-                                    color: isOver ? Colors.red : Colors.black87,
+                                    color: isOver
+                                        ? Colors.red
+                                        : Theme.of(
+                                            context,
+                                          ).textTheme.titleLarge?.color,
                                   ),
                                 ),
                               ],
@@ -138,7 +157,7 @@ class CalculatorPage extends GetView<CalculatorPageController> {
                         Icon(
                           Icons.arrow_forward_ios,
                           size: 16,
-                          color: Colors.grey[600],
+                          color: Theme.of(context).textTheme.bodySmall?.color,
                         ),
                       ],
                     ),
@@ -165,12 +184,12 @@ class CalculatorPage extends GetView<CalculatorPageController> {
               }),
 
               // 4. Previous Reading
-               Text(
+              Text(
                 "Previous Reading".tr,
                 style: TextStyle(
                   fontWeight: FontWeight.w600,
                   fontSize: 14,
-                  color: Colors.black87,
+                  color: Theme.of(context).textTheme.titleMedium?.color,
                 ),
               ),
               const SizedBox(height: 8),
@@ -180,11 +199,15 @@ class CalculatorPage extends GetView<CalculatorPageController> {
                     text: controller.lastDbReading.value?.toString() ?? '0',
                   ),
                   enabled: false,
-                  style: const TextStyle(color: Colors.grey),
+                  style: TextStyle(
+                    color: Theme.of(context).textTheme.bodySmall?.color,
+                  ),
                   decoration: InputDecoration(
                     hintText: "Fetching...".tr,
                     filled: true,
-                    fillColor: Colors.grey[100],
+                    fillColor: Theme.of(context).brightness == Brightness.dark
+                        ? Theme.of(context).cardColor
+                        : Colors.grey[100],
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
                       borderSide: BorderSide.none,
@@ -193,7 +216,10 @@ class CalculatorPage extends GetView<CalculatorPageController> {
                       vertical: 16,
                       horizontal: 16,
                     ),
-                    prefixIcon: Icon(Icons.history, color: Colors.grey[400]),
+                    prefixIcon: Icon(
+                      Icons.history,
+                      color: Theme.of(context).textTheme.bodySmall?.color,
+                    ),
                   ),
                 ),
               ),
@@ -201,12 +227,12 @@ class CalculatorPage extends GetView<CalculatorPageController> {
               const SizedBox(height: 20),
 
               // 5. Current Reading
-               Text(
+              Text(
                 "Current Reading".tr,
                 style: TextStyle(
                   fontWeight: FontWeight.w600,
                   fontSize: 14,
-                  color: Colors.black87,
+                  color: Theme.of(context).textTheme.titleMedium?.color,
                 ),
               ),
               const SizedBox(height: 8),
@@ -217,15 +243,19 @@ class CalculatorPage extends GetView<CalculatorPageController> {
                   hintText: "Enter today's reading".tr,
                   hintStyle: TextStyle(color: Colors.grey[400]),
                   filled: true,
-                  fillColor: Colors.white,
+                  fillColor: Theme.of(context).cardColor,
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(color: Colors.grey[300]!),
+                    borderSide: BorderSide(
+                      color: Theme.of(context).brightness == Brightness.dark
+                          ? Colors.grey[800]!
+                          : Colors.grey[300]!,
+                    ),
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
-                    borderSide: const BorderSide(
-                      color: Color(0xFF1565C0),
+                    borderSide: BorderSide(
+                      color: Theme.of(context).primaryColor,
                       width: 1.5,
                     ),
                   ),
@@ -233,7 +263,10 @@ class CalculatorPage extends GetView<CalculatorPageController> {
                     vertical: 16,
                     horizontal: 16,
                   ),
-                  prefixIcon: const Icon(Icons.speed, color: Color(0xFF1565C0)),
+                  prefixIcon: Icon(
+                    Icons.speed,
+                    color: Theme.of(context).primaryColor,
+                  ),
                 ),
               ),
 
@@ -252,7 +285,7 @@ class CalculatorPage extends GetView<CalculatorPageController> {
                               : Icons.mic,
                           color: controller.isListening.value
                               ? Colors.red
-                              : Colors.black54,
+                              : Theme.of(context).textTheme.bodyLarge?.color,
                         ),
                         label: Text(
                           controller.isListening.value
@@ -261,17 +294,23 @@ class CalculatorPage extends GetView<CalculatorPageController> {
                           style: TextStyle(
                             color: controller.isListening.value
                                 ? Colors.red
-                                : Colors.black87,
+                                : Theme.of(context).textTheme.bodyLarge?.color,
                             fontSize: 13,
                           ),
                         ),
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.white,
+                          backgroundColor: Theme.of(context).cardColor,
                           elevation: 0,
                           padding: const EdgeInsets.symmetric(vertical: 16),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
-                            side: BorderSide(color: Colors.grey[300]!),
+                            side: BorderSide(
+                              color:
+                                  Theme.of(context).brightness ==
+                                      Brightness.dark
+                                  ? Colors.grey[800]!
+                                  : Colors.grey[300]!,
+                            ),
                           ),
                         ),
                       ),
@@ -284,21 +323,29 @@ class CalculatorPage extends GetView<CalculatorPageController> {
                         controller.currentReadingController,
                         context,
                       ),
-                      icon: const Icon(
+                      icon: Icon(
                         Icons.camera_alt_outlined,
-                        color: Colors.black54,
+                        color: Theme.of(context).textTheme.bodyLarge?.color,
                       ),
                       label: Text(
                         "Scan Meter".tr,
-                        style: TextStyle(color: Colors.black87, fontSize: 13),
+                        style: TextStyle(
+                          color: Theme.of(context).textTheme.bodyLarge?.color,
+                          fontSize: 13,
+                        ),
                       ),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.white,
+                        backgroundColor: Theme.of(context).cardColor,
                         elevation: 0,
                         padding: const EdgeInsets.symmetric(vertical: 16),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
-                          side: BorderSide(color: Colors.grey[300]!),
+                          side: BorderSide(
+                            color:
+                                Theme.of(context).brightness == Brightness.dark
+                                ? Colors.grey[800]!
+                                : Colors.grey[300]!,
+                          ),
                         ),
                       ),
                     ),
@@ -314,10 +361,12 @@ class CalculatorPage extends GetView<CalculatorPageController> {
                 child: ElevatedButton(
                   onPressed: () => controller.calculate(),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF1565C0),
+                    backgroundColor: Theme.of(context).primaryColor,
                     foregroundColor: Colors.white,
                     elevation: 4,
-                    shadowColor: const Color(0xFF1565C0).withOpacity(0.4),
+                    shadowColor: Theme.of(
+                      context,
+                    ).primaryColor.withOpacity(0.4),
                     padding: const EdgeInsets.symmetric(vertical: 18),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(16),
@@ -338,23 +387,32 @@ class CalculatorPage extends GetView<CalculatorPageController> {
                   if (controller.cost.value.isEmpty)
                     return const SizedBox.shrink();
                   final isOver = budgetController.isOverBudget.value;
-
+                  final isDark =
+                      Theme.of(context).brightness == Brightness.dark;
                   return Container(
                     padding: const EdgeInsets.all(24),
                     width: double.infinity,
                     decoration: BoxDecoration(
-                      color: isOver ? Colors.red.shade50 : Colors.white,
+                      color: isOver
+                          ? (isDark
+                                ? Colors.red.shade900.withOpacity(0.3)
+                                : Colors.red.shade50)
+                          : Theme.of(context).cardColor,
                       borderRadius: BorderRadius.circular(20),
                       border: Border.all(
                         color: isOver
-                            ? Colors.red.shade200
-                            : Colors.blue.shade50,
+                            ? (isDark
+                                  ? Colors.red.shade700
+                                  : Colors.red.shade200)
+                            : (isDark
+                                  ? Colors.blue.shade800
+                                  : Colors.blue.shade50),
                       ),
                       boxShadow: [
                         BoxShadow(
                           color: isOver
-                              ? Colors.red.withOpacity(0.1)
-                              : Colors.blue.withOpacity(0.08),
+                              ? Colors.red.withOpacity(isDark ? 0.3 : 0.1)
+                              : Colors.blue.withOpacity(isDark ? 0.2 : 0.08),
                           blurRadius: 20,
                           offset: const Offset(0, 10),
                         ),
@@ -363,10 +421,12 @@ class CalculatorPage extends GetView<CalculatorPageController> {
                     child: Column(
                       children: [
                         Text(
-                          isOver ? "Limit Exceeded!".tr: "Estimated Bill".tr,
+                          isOver ? "Limit Exceeded!".tr : "Estimated Bill".tr,
                           style: TextStyle(
                             fontSize: 14,
-                            color: isOver ? Colors.red : Colors.grey[600],
+                            color: isOver
+                                ? Colors.red
+                                : Theme.of(context).textTheme.bodySmall?.color,
                             fontWeight: FontWeight.w600,
                           ),
                         ),
@@ -379,7 +439,7 @@ class CalculatorPage extends GetView<CalculatorPageController> {
                             fontWeight: FontWeight.bold,
                             color: isOver
                                 ? Colors.red
-                                : const Color(0xFF1565C0),
+                                : Theme.of(context).primaryColor,
                           ),
                         ),
                         const SizedBox(height: 12),
@@ -389,7 +449,13 @@ class CalculatorPage extends GetView<CalculatorPageController> {
                             vertical: 6,
                           ),
                           decoration: BoxDecoration(
-                            color: isOver ? Colors.white : Colors.blue.shade50,
+                            color: isOver
+                                ? (isDark
+                                      ? Theme.of(context).cardColor
+                                      : Colors.white)
+                                : (isDark
+                                      ? Colors.blue.shade900.withOpacity(0.5)
+                                      : Colors.blue.shade50),
                             borderRadius: BorderRadius.circular(20),
                           ),
                           child: Text(
@@ -397,7 +463,11 @@ class CalculatorPage extends GetView<CalculatorPageController> {
                             style: TextStyle(
                               fontSize: 14,
                               fontWeight: FontWeight.w600,
-                              color: isOver ? Colors.red : Colors.blue[800],
+                              color: isOver
+                                  ? Colors.red
+                                  : (isDark
+                                        ? Colors.blue.shade300
+                                        : Colors.blue[800]),
                             ),
                           ),
                         ),

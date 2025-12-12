@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:graduation_project_depi/controllers/theme_controller.dart';
 import 'package:graduation_project_depi/controllers/analytics_page_controller.dart';
 import 'package:graduation_project_depi/controllers/calculator_page_controller.dart';
 import 'package:graduation_project_depi/services/budget_service.dart';
@@ -26,6 +27,8 @@ import 'views/forgot_password_screen.dart';
 import 'services/auth_service.dart';
 import 'language/app_translation.dart';
 import 'package:get_storage/get_storage.dart';
+import 'config/app_themes.dart';
+
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -58,6 +61,8 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+        final themeController = Get.put(ThemeController());
+
     return GetMaterialApp(
       translations: AppTranslation(),
       locale: langCode != null ? Locale(langCode!) : Locale('en', 'US'),
@@ -70,7 +75,10 @@ class MyApp extends StatelessWidget {
         Get.put<LanguageController>(LanguageController());
       }),
       debugShowCheckedModeBanner: false,
-      initialRoute: '/splash_screen',
+              theme: AppThemes.lightTheme,
+        darkTheme: AppThemes.darkTheme,
+        themeMode: themeController.themeMode,
+        initialRoute: '/splash_screen',
       getPages: [
         GetPage(name: '/splash_screen', page: () => SplashScreen()),
         GetPage(

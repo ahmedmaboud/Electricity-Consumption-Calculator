@@ -30,8 +30,10 @@ class _SplashScreenState extends State<SplashScreen> {
 
   @override
   Widget build(BuildContext context) {
+        final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F5F5),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: Stack(
         children: [
           Align(
@@ -39,7 +41,10 @@ class _SplashScreenState extends State<SplashScreen> {
             child: SizedBox(
               width: MediaQuery.of(context).size.width / 2,
               height: double.infinity,
-              child: Container(color: Colors.blue[700]),
+              child: Container(
+                color: isDark
+                    ? Theme.of(context).primaryColor.withOpacity(0.3)
+                    : Theme.of(context).primaryColor,),
             ),
           ),
           Center(
@@ -51,11 +56,14 @@ class _SplashScreenState extends State<SplashScreen> {
                   width: 100,
                   height: 100,
                   decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.15),
+                   color: isDark
+                        ? Colors.white.withOpacity(0.1)
+                        : Colors.white.withOpacity(0.15),
                     borderRadius: BorderRadius.circular(16),
                   ),
                   child: Center(
-                    child: Icon(Icons.bolt, color: Colors.blue[700], size: 80),
+                    child: Icon(Icons.bolt,                       color: Theme.of(context).primaryColor,
+ size: 80),
                   ),
                 ),
               ),

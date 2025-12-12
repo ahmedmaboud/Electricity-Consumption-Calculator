@@ -3,7 +3,6 @@ import 'package:get/get.dart';
 import '../../controllers/profile_controller.dart';
 import '../../controllers/language_controller.dart';
 
-
 class ProfileScreen extends GetView<ProfileController> {
   const ProfileScreen({super.key});
   @override
@@ -118,7 +117,7 @@ class ProfileScreen extends GetView<ProfileController> {
           ProfileSection(
             children: [
               Obx(
-                    () => SwitchItem(
+                () => SwitchItem(
                   icon: Icons.language,
                   title: 'Language'.tr,
                   value: langController.isArabic.value,
@@ -135,18 +134,18 @@ class ProfileScreen extends GetView<ProfileController> {
                   onChanged: controller.toggleNotifications,
                 ),
               ),
+
               const CustomDivider(),
               Obx(
                 () => SwitchItem(
                   icon: Icons.dark_mode_outlined,
-                  title: 'Dark Mode'.tr,
-                  value: controller.darkMode.value,
-                  onChanged: controller.toggleDarkMode,
+                  title: 'Dark Mode',
+                  value: controller.themeController.isDarkMode.value,
+                  onChanged: (value) => controller.toggleDarkMode(value),
                 ),
               ),
             ],
           ),
-
           const SizedBox(height: 20),
 
           // --- Action Buttons ---
@@ -156,7 +155,8 @@ class ProfileScreen extends GetView<ProfileController> {
             child: ElevatedButton(
               onPressed: controller.logout,
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF007AFF),
+                backgroundColor: Theme.of(context).primaryColor,
+
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
@@ -203,9 +203,13 @@ class ProfileScreen extends GetView<ProfileController> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-               Text(
+              Text(
                 'Choose Avatar'.tr,
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: Theme.of(context).textTheme.titleLarge?.color,
+                ),
               ),
               const SizedBox(height: 16),
               Expanded(
@@ -235,6 +239,7 @@ class ProfileScreen extends GetView<ProfileController> {
     );
   }
 }
+
 // --- Reusable Components (Stateless) ---
 class ProfileSection extends StatelessWidget {
   final List<Widget> children;
@@ -244,11 +249,14 @@ class ProfileSection extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).cardColor,
+
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.02),
+            color: Theme.of(context).brightness == Brightness.dark
+                ? Colors.black.withOpacity(0.3)
+                : Colors.black.withOpacity(0.02),
             blurRadius: 10,
             offset: const Offset(0, 5),
           ),
@@ -283,25 +291,35 @@ class ProfileItem extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
         child: Row(
           children: [
-            Icon(icon, color: Colors.grey[600], size: 22),
+            Icon(
+              icon,
+              color: Theme.of(context).textTheme.bodySmall?.color,
+              size: 22,
+            ),
             const SizedBox(width: 16),
             Text(
               title,
-              style: const TextStyle(
+              style:  TextStyle(
                 fontSize: 16,
-                fontWeight: FontWeight.w400,
-                color: Colors.black87,
+                fontWeight: FontWeight.w400 ,color: Theme.of(context).textTheme.bodyLarge?.color,
               ),
             ),
             const Spacer(),
             if (value != null)
               Text(
                 value!,
+<<<<<<< Updated upstream
                 style: TextStyle(fontSize: 13, color: Colors.grey[600]),
+=======
+                style: TextStyle(
+                  fontSize: 12,
+                  color: Theme.of(context).textTheme.bodySmall?.color,
+                ),
+>>>>>>> Stashed changes
               ),
             if (hasNavigation) ...[
               if (value != null) const SizedBox(width: 8),
-              Icon(Icons.arrow_forward_ios, color: Colors.grey[400], size: 16),
+              Icon(Icons.arrow_forward_ios,color: Theme.of(context).textTheme.bodySmall?.color, size: 16),
             ],
           ],
         ),
@@ -330,22 +348,24 @@ class SwitchItem extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: Row(
         children: [
-          Icon(icon, color: Colors.grey[600], size: 22),
+          Icon(icon,color: Theme.of(context).textTheme.bodySmall?.color,
+size: 22),
           const SizedBox(width: 16),
           Expanded(
             child: Text(
               title,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w400,
-                color: Colors.black87,
+                                color: Theme.of(context).textTheme.bodyLarge?.color,
+
               ),
             ),
           ),
           Switch.adaptive(
             value: value,
             onChanged: onChanged,
-            activeColor: const Color(0xFF007AFF),
+            activeColor: Theme.of(context).primaryColor,
           ),
         ],
       ),
@@ -361,7 +381,7 @@ class CustomDivider extends StatelessWidget {
     return Divider(
       height: 1,
       thickness: 0.5,
-      color: Colors.grey[300],
+      color: Theme.of(context).dividerColor,
       indent: 54,
     );
   }
