@@ -52,7 +52,7 @@ class AnalyticsController extends GetxController {
   late final SupabaseClient _supabase;
   
   StreamSubscription? _entriesSub;
-  StreamSubscription? _authSub; // FIX: Listen for Auth Changes
+  StreamSubscription? _authSub;
 
   @override
   void onInit() {
@@ -60,15 +60,13 @@ class AnalyticsController extends GetxController {
     _readingService = Get.find<ElectricityReadingService>();
     _supabase = Get.find<SupabaseClient>();
 
-    // FIX: Listen for Auth State Changes (Restoring session on restart)
     _authSub = _supabase.auth.onAuthStateChange.listen((data) {
       if (data.session != null) {
-        loadEntries(); // Load data as soon as session is restored
+        loadEntries();
       }
     });
 
     WidgetsBinding.instance.addPostFrameCallback((_) async {
-      // Try loading immediately (in case already logged in)
       await loadEntries();
       
       _entriesSub = entries.listen((_) => _rebuildAggregates());
@@ -86,11 +84,11 @@ class AnalyticsController extends GetxController {
   Future<void> loadEntries() async {
     try {
       final userId = _supabase.auth.currentUser?.id;
-      // If null, we wait for the Auth Listener to trigger this again later
       if (userId == null) return; 
 
       final List<Reading> userReadings = await _readingService.getUserReadings(userId);
 
+      // We need at least 2 readings to show a valid "Consumption" bar
       if (userReadings.isEmpty) {
         entries.clear();
         _rebuildAggregates();
@@ -98,18 +96,19 @@ class AnalyticsController extends GetxController {
         return;
       }
 
-      // Sort Oldest -> Newest
       userReadings.sort((a, b) => _safeDate(a.createdAt).compareTo(_safeDate(b.createdAt)));
 
       final List<ConsumptionEntry> loaded = [];
 
-      for (int i = 0; i < userReadings.length; i++) {
+      // --- FIX: Start loop at 1 to skip the first reading ---
+      // This hides the "First Consumption" spike and only shows usage relative to a previous reading.
+      for (int i = 1; i < userReadings.length; i++) {
         final curr = userReadings[i];
+        final prev = userReadings[i - 1]; // We can safely access i-1 now
+
         final DateTime dateCurr = _safeDate(curr.createdAt);
         final double meterCurr = _safeMeter(curr.meterValue);
-
-        // Logic: If first reading ever, assume previous was 0
-        final double meterPrev = (i == 0) ? 0.0 : _safeMeter(userReadings[i - 1].meterValue);
+        final double meterPrev = _safeMeter(prev.meterValue);
 
         final double kwh = (meterCurr - meterPrev).isFinite ? (meterCurr - meterPrev) : 0.0;
         final double totalCost = (curr.cost ?? 0.0).isFinite ? curr.cost ?? 0.0 : 0.0;
@@ -141,7 +140,7 @@ class AnalyticsController extends GetxController {
 
   void refreshData() => loadEntries();
 
-  // --- Helpers ---
+  // --- REVERTED: Getters now return full data (The filtering is done in loadEntries) ---
   void _rebuildAggregates() {
     monthlyData.clear();
     yearlyData.clear();
@@ -152,6 +151,12 @@ class AnalyticsController extends GetxController {
       yearlyData[yearKey] = (yearlyData[yearKey] ?? 0.0) + e.kwh;
     }
   }
+
+  // REVERTED: No sublist here. Displays exactly what is in 'entries'.
+  List<String> get aggLabels => (mode.value == AnalyticsMode.monthly) ? monthlyData.keys.toList() : yearlyData.keys.toList();
+  
+  // REVERTED: No sublist here.
+  List<double> get aggValues => (mode.value == AnalyticsMode.monthly) ? monthlyData.values.toList() : yearlyData.values.toList();
 
   DateTime _safeDate(dynamic raw) {
     if (raw == null) return DateTime.now();
@@ -180,8 +185,6 @@ class AnalyticsController extends GetxController {
     return months[i];
   }
 
-  List<String> get aggLabels => (mode.value == AnalyticsMode.monthly) ? monthlyData.keys.toList() : yearlyData.keys.toList();
-  List<double> get aggValues => (mode.value == AnalyticsMode.monthly) ? monthlyData.values.toList() : yearlyData.values.toList();
   double get totalConsumption => aggValues.fold<double>(0.0, (p, e) => p + (e.isFinite ? e : 0.0));
   ConsumptionEntry? get latest => entries.isNotEmpty ? entries.last : null;
   int get highlightedIndex {
@@ -261,4 +264,3 @@ class AnalyticsController extends GetxController {
 
   }
 }
-

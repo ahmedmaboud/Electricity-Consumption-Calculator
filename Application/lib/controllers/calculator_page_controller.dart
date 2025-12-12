@@ -86,7 +86,12 @@ class CalculatorPageController extends GetxController {
       return false;
     }
     if (current < previous) {
-      Get.snackbar('Error'.tr, 'Current reading cannot be less than previous reading!'.tr, backgroundColor: Colors.red, colorText: Colors.white);
+      Get.snackbar(
+        'Error'.tr,
+        'Current reading cannot be less than previous reading!'.tr,
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
       return false;
     }
     return true;
@@ -97,19 +102,37 @@ class CalculatorPageController extends GetxController {
 
     final userId = _supabase.auth.currentUser?.id;
     if (userId == null) {
-      Get.snackbar('Error'.tr, 'User not logged in.'.tr, backgroundColor: Colors.red, colorText: Colors.white);
+      Get.snackbar(
+        'Error'.tr,
+        'User not logged in.'.tr,
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
       return;
     }
 
     isLoading.value = true;
     final current = int.parse(currentReadingController.text);
-    final previous = lastDbReading.value ?? 0;
+    var previous = lastDbReading.value ?? 0;
+    if (previous == 0) {
+      lastDbReading.value = current;
+      isLoading.value = false;
+      final newReading = Reading(
+      userId: userId,
+      meterValue: current,
+      cost: null,
+      createdAt: DateTime.now(),
+    );
+    await _readingService.insertReading(newReading);
+      return;
+    }
     final consum = current - previous;
     final totalCost = calculateElectricity(current, previous);
 
     cost.value = 'Total Bill: %s EGP'.trArgs([totalCost.toStringAsFixed(2)]);
-    consumption.value = 'Consumption: %s KWH'.trArgs([consum.toStringAsFixed(0)]);
-
+    consumption.value = 'Consumption: %s KWH'.trArgs([
+      consum.toStringAsFixed(0),
+    ]);
 
     if (Get.isRegistered<BudgetController>()) {
       Get.find<BudgetController>().checkBudgetStatus(totalCost);
@@ -125,7 +148,12 @@ class CalculatorPageController extends GetxController {
     bool success = await _readingService.insertReading(newReading);
 
     if (success) {
-      Get.snackbar('Success'.tr, 'Saved successfully!'.tr, backgroundColor: Colors.green, colorText: Colors.white);
+      Get.snackbar(
+        'Success'.tr,
+        'Saved successfully!'.tr,
+        backgroundColor: Colors.green,
+        colorText: Colors.white,
+      );
 
       if (Get.isRegistered<HistoryController>()) {
         Get.find<HistoryController>().addLocalReading(newReading, consum);
@@ -142,7 +170,12 @@ class CalculatorPageController extends GetxController {
       lastDbReading.value = current;
       currentReadingController.clear();
     } else {
-      Get.snackbar('Error'.tr, 'Failed to save.'.tr, backgroundColor: Colors.red, colorText: Colors.white);
+      Get.snackbar(
+        'Error'.tr,
+        'Failed to save.'.tr,
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
     }
 
     isLoading.value = false;
@@ -160,7 +193,10 @@ class CalculatorPageController extends GetxController {
         isListening.value = true;
         _speech.listen(
           onResult: (result) {
-            final numbers = RegExp(r'\d+').allMatches(result.recognizedWords).map((m) => m.group(0)).join("");
+            final numbers = RegExp(r'\d+')
+                .allMatches(result.recognizedWords)
+                .map((m) => m.group(0))
+                .join("");
             if (numbers.isNotEmpty) currentReadingController.text = numbers;
           },
           localeId: 'ar_EG',
@@ -168,7 +204,12 @@ class CalculatorPageController extends GetxController {
           pauseFor: const Duration(seconds: 3),
         );
       } else {
-        Get.snackbar("Error".tr, "Speech recognition not available".tr, backgroundColor: Colors.red, colorText: Colors.white);
+        Get.snackbar(
+          "Error".tr,
+          "Speech recognition not available".tr,
+          backgroundColor: Colors.red,
+          colorText: Colors.white,
+        );
       }
     } else {
       isListening.value = false;
@@ -176,27 +217,57 @@ class CalculatorPageController extends GetxController {
     }
   }
 
-  Future<void> scanForField(TextEditingController target, BuildContext context) async {
+  Future<void> scanForField(
+    TextEditingController target,
+    BuildContext context,
+  ) async {
     showModalBottomSheet(
       context: context,
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
       builder: (_) {
         return SafeArea(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               const SizedBox(height: 10),
-              Container(width: 40, height: 4, decoration: BoxDecoration(color: Colors.grey[300], borderRadius: BorderRadius.circular(2))),
+              Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: Colors.grey[300],
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
               const SizedBox(height: 20),
               ListTile(
-                leading: const CircleAvatar(backgroundColor: Color(0xFFE3F2FD), child: Icon(Icons.camera_alt, color: Color(0xFF1565C0))),
-                title:  Text("Take Photo".tr, style: TextStyle(fontWeight: FontWeight.w600)),
-                onTap: () async { Get.back(); await runOCR(target, ImageSource.camera); },
+                leading: const CircleAvatar(
+                  backgroundColor: Color(0xFFE3F2FD),
+                  child: Icon(Icons.camera_alt, color: Color(0xFF1565C0)),
+                ),
+                title: Text(
+                  "Take Photo".tr,
+                  style: TextStyle(fontWeight: FontWeight.w600),
+                ),
+                onTap: () async {
+                  Get.back();
+                  await runOCR(target, ImageSource.camera);
+                },
               ),
               ListTile(
-                leading: const CircleAvatar(backgroundColor: Color(0xFFE3F2FD), child: Icon(Icons.photo_library, color: Color(0xFF1565C0))),
-                title: Text("Choose from Gallery".tr, style: TextStyle(fontWeight: FontWeight.w600)),
-                onTap: () async { Get.back(); await runOCR(target, ImageSource.gallery); },
+                leading: const CircleAvatar(
+                  backgroundColor: Color(0xFFE3F2FD),
+                  child: Icon(Icons.photo_library, color: Color(0xFF1565C0)),
+                ),
+                title: Text(
+                  "Choose from Gallery".tr,
+                  style: TextStyle(fontWeight: FontWeight.w600),
+                ),
+                onTap: () async {
+                  Get.back();
+                  await runOCR(target, ImageSource.gallery);
+                },
               ),
               const SizedBox(height: 20),
             ],
@@ -225,15 +296,30 @@ class CalculatorPageController extends GetxController {
       await recognizer.close();
       isLoading.value = false;
       if (numbers.isEmpty) {
-        Get.snackbar("Error".tr, "No numbers found!".tr, backgroundColor: Colors.orange, colorText: Colors.white);
+        Get.snackbar(
+          "Error".tr,
+          "No numbers found!".tr,
+          backgroundColor: Colors.orange,
+          colorText: Colors.white,
+        );
         return;
       }
       numbers.sort();
       target.text = numbers.last.toString();
-      Get.snackbar("Done".tr, "Number extracted: %s".trArgs([numbers.last.toString()]), backgroundColor: Colors.green, colorText: Colors.white);
+      Get.snackbar(
+        "Done".tr,
+        "Number extracted: %s".trArgs([numbers.last.toString()]),
+        backgroundColor: Colors.green,
+        colorText: Colors.white,
+      );
     } catch (e) {
       isLoading.value = false;
-      Get.snackbar("Error".tr,  "Failed to scan image: %s".trArgs([e.toString()]), backgroundColor: Colors.red, colorText: Colors.white);
+      Get.snackbar(
+        "Error".tr,
+        "Failed to scan image: %s".trArgs([e.toString()]),
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
     }
   }
 }

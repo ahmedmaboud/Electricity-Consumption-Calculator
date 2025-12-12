@@ -6,7 +6,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../entities/history_item.dart';
 import '../entities/reading.dart';
 import 'calculator_page_controller.dart';
-import 'analytics_page_controller.dart'; 
+import 'analytics_page_controller.dart';
 
 class HistoryController extends GetxController {
   final _readingService = Get.find<ElectricityReadingService>();
@@ -20,24 +20,24 @@ class HistoryController extends GetxController {
 
   final totalConsumption = 0.obs;
   final totalCost = RxDouble(0);
-  
+
   StreamSubscription? _authSub;
 
   @override
   void onInit() {
     super.onInit();
-    
+
     // Listen for Auth to load data on app restart
     _authSub = _supabase.auth.onAuthStateChange.listen((data) {
       if (data.session != null) {
         fetchHistory();
       }
     });
-    
+
     // Also try fetching immediately
     fetchHistory();
   }
-  
+
   @override
   void onClose() {
     _authSub?.cancel();
@@ -55,31 +55,49 @@ class HistoryController extends GetxController {
     final readings = await _readingService.getUserReadings(userId);
 
     readings.sort(
-      (a, b) => (b.createdAt ?? DateTime.now()).compareTo(a.createdAt ?? DateTime.now()),
+      (a, b) => (b.createdAt ?? DateTime.now()).compareTo(
+        a.createdAt ?? DateTime.now(),
+      ),
     );
 
     _allItems.clear();
-    const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const monthNames = [
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
+    ];
 
     for (int i = 0; i < readings.length; i++) {
       int consumption = 0;
       if (i + 1 < readings.length) {
         consumption = readings[i].meterValue - readings[i + 1].meterValue;
       } else {
-        consumption = 0;
+        consumption = readings[i].meterValue;
       }
       if (consumption < 0) consumption = 0;
 
       final date = readings[i].createdAt ?? DateTime.now();
-      final formattedDate = "${monthNames[date.month - 1]} ${date.day}, ${date.year}";
-      
+      final formattedDate =
+          "${monthNames[date.month - 1]} ${date.day}, ${date.year}";
+
       int? rId;
-      if (readings[i].id is int) rId = readings[i].id as int;
-      else if (readings[i].id is String) rId = int.tryParse(readings[i].id as String);
+      if (readings[i].id is int)
+        rId = readings[i].id as int;
+      else if (readings[i].id is String)
+        rId = int.tryParse(readings[i].id as String);
 
       _allItems.add(
         HistoryItem(
-          id: rId, 
+          id: rId,
           consumption: consumption,
           cost: readings[i].cost ?? 0,
           date: date,
@@ -135,7 +153,12 @@ class HistoryController extends GetxController {
         backgroundColor: Colors.red,
         colorText: Colors.white,
       );
-      Get.snackbar("Success".tr, "All history cleared".tr, backgroundColor: Colors.green, colorText: Colors.white);
+      Get.snackbar(
+        "Success".tr,
+        "All history cleared".tr,
+        backgroundColor: Colors.green,
+        colorText: Colors.white,
+      );
     }
     isLoading.value = false;
   }
@@ -145,7 +168,15 @@ class HistoryController extends GetxController {
     final now = DateTime.now();
 
     if (selectedDateRange.value != null) {
-      temp = temp.where((i) => i.date.isAfter(selectedDateRange.value!.start) && i.date.isBefore(selectedDateRange.value!.end.add(const Duration(days: 1)))).toList();
+      temp = temp
+          .where(
+            (i) =>
+                i.date.isAfter(selectedDateRange.value!.start) &&
+                i.date.isBefore(
+                  selectedDateRange.value!.end.add(const Duration(days: 1)),
+                ),
+          )
+          .toList();
     } else {
       if (selectedTab.value == 'Month') {
         temp = temp.where((i) => now.difference(i.date).inDays <= 30).toList();
@@ -161,17 +192,19 @@ class HistoryController extends GetxController {
     }
 
     historyItems.assignAll(temp);
+    if (historyItems.isNotEmpty){historyItems.removeLast();}
+    
 
     int tc = 0;
     double tcost = 0;
-    for (var i in temp) {
+    for (var i in historyItems) {
       tc += i.consumption;
       tcost += i.cost;
     }
     totalConsumption.value = tc;
     totalCost.value = tcost;
   }
-  
+
   void changeTab(String tab) {
     selectedTab.value = tab;
     selectedDateRange.value = null;
@@ -188,7 +221,8 @@ class HistoryController extends GetxController {
     selectedTab.value = '';
     applyFilters();
   }
+
   void addLocalReading(Reading reading, int consumption) {
-     fetchHistory();
+    fetchHistory();
   }
 }
