@@ -2,12 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-<<<<<<< HEAD
-      <module fileurl="file://$PROJECT_DIR$/graduation_project_depi.iml" filepath="$PROJECT_DIR$/graduation_project_depi.iml" />
-      <module fileurl="file://$PROJECT_DIR$/android/graduation_project_depi_android.iml" filepath="$PROJECT_DIR$/android/graduation_project_depi_android.iml" />
-=======
       <module fileurl="file://$PROJECT_DIR$/.idea/Collaborative-Shopping-List-App.iml" filepath="$PROJECT_DIR$/.idea/Collaborative-Shopping-List-App.iml" />
->>>>>>> 9ffc742085e1f1f4351ced11c8bc660b84bb59d4
     </modules>
   </component>
 </project>
