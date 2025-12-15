@@ -126,14 +126,7 @@ class ProfileScreen extends GetView<ProfileController> {
                   },
                 ),
               ),
-              Obx(
-                () => SwitchItem(
-                  icon: Icons.notifications_none,
-                  title: 'Push Notifications'.tr,
-                  value: controller.pushNotifications.value,
-                  onChanged: controller.toggleNotifications,
-                ),
-              ),
+              
 
               const CustomDivider(),
               Obx(
@@ -308,14 +301,13 @@ class ProfileItem extends StatelessWidget {
             if (value != null)
               Text(
                 value!,
-<<<<<<< Updated upstream
-                style: TextStyle(fontSize: 13, color: Colors.grey[600]),
-=======
+
+
                 style: TextStyle(
                   fontSize: 12,
                   color: Theme.of(context).textTheme.bodySmall?.color,
                 ),
->>>>>>> Stashed changes
+
               ),
             if (hasNavigation) ...[
               if (value != null) const SizedBox(width: 8),
