@@ -126,7 +126,6 @@ class ProfileScreen extends GetView<ProfileController> {
                   },
                 ),
               ),
-              
 
               const CustomDivider(),
               Obx(
@@ -144,12 +143,11 @@ class ProfileScreen extends GetView<ProfileController> {
           // --- Action Buttons ---
           SizedBox(
             width: double.infinity,
-            height: 50,
             child: ElevatedButton(
               onPressed: controller.logout,
               style: ElevatedButton.styleFrom(
                 backgroundColor: Theme.of(context).primaryColor,
-
+                padding: const EdgeInsets.symmetric(vertical: 14),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
@@ -157,14 +155,16 @@ class ProfileScreen extends GetView<ProfileController> {
               ),
               child: Text(
                 'Log Out'.tr,
-                style: TextStyle(
+                style: const TextStyle(
                   color: Colors.white,
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
+                  height: 1.3,
                 ),
               ),
             ),
           ),
+
           const SizedBox(height: 16),
           TextButton(
             onPressed: controller.deleteAccount,
@@ -292,9 +292,10 @@ class ProfileItem extends StatelessWidget {
             const SizedBox(width: 16),
             Text(
               title,
-              style:  TextStyle(
+              style: TextStyle(
                 fontSize: 16,
-                fontWeight: FontWeight.w400 ,color: Theme.of(context).textTheme.bodyLarge?.color,
+                fontWeight: FontWeight.w400,
+                color: Theme.of(context).textTheme.bodyLarge?.color,
               ),
             ),
             const Spacer(),
@@ -302,16 +303,18 @@ class ProfileItem extends StatelessWidget {
               Text(
                 value!,
 
-
                 style: TextStyle(
                   fontSize: 12,
                   color: Theme.of(context).textTheme.bodySmall?.color,
                 ),
-
               ),
             if (hasNavigation) ...[
               if (value != null) const SizedBox(width: 8),
-              Icon(Icons.arrow_forward_ios,color: Theme.of(context).textTheme.bodySmall?.color, size: 16),
+              Icon(
+                Icons.arrow_forward_ios,
+                color: Theme.of(context).textTheme.bodySmall?.color,
+                size: 16,
+              ),
             ],
           ],
         ),
@@ -340,8 +343,11 @@ class SwitchItem extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: Row(
         children: [
-          Icon(icon,color: Theme.of(context).textTheme.bodySmall?.color,
-size: 22),
+          Icon(
+            icon,
+            color: Theme.of(context).textTheme.bodySmall?.color,
+            size: 22,
+          ),
           const SizedBox(width: 16),
           Expanded(
             child: Text(
@@ -349,8 +355,7 @@ size: 22),
               style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w400,
-                                color: Theme.of(context).textTheme.bodyLarge?.color,
-
+                color: Theme.of(context).textTheme.bodyLarge?.color,
               ),
             ),
           ),

@@ -206,10 +206,14 @@ class AnalyticsView extends StatelessWidget {
                     breakdown = ctrl.aggregatedBreakdownForLabel(label);
                     totalCost = ctrl.totalCostForAggLabel(label);
                   } else {
-                    breakdown =
-                        ctrl.latest?.breakdown ??
-                        CostBreakdown(peak: 0, offPeak: 0, taxes: 0);
-                    totalCost = ctrl.latest?.totalCost ?? 0.0;
+                    if (ctrl.aggLabels.isNotEmpty) {
+                      final lastLabel = ctrl.aggLabels.last;
+                      breakdown = ctrl.aggregatedBreakdownForLabel(lastLabel);
+                      totalCost = ctrl.totalCostForAggLabel(lastLabel);
+                    } else {
+                      breakdown = CostBreakdown(peak: 0, offPeak: 0, taxes: 0);
+                      totalCost = 0.0;
+                    }
                   }
 
                   return _buildCostBreakdownCard(context, breakdown, totalCost);
@@ -633,7 +637,7 @@ Color color, String label, double value) {
             Text(
               label,
               style: TextStyle(                color: Theme.of(context).textTheme.bodySmall?.color,
- fontSize: 12),
+ fontSize: 10),
             ),
           ],
         ),

@@ -192,9 +192,11 @@ class HistoryController extends GetxController {
     }
 
     historyItems.assignAll(temp);
-    if (historyItems.isNotEmpty){historyItems.removeLast();}
-    
-
+    if (historyItems.isNotEmpty && isNewestFirst.value) {
+      historyItems.removeLast();
+    } else if (historyItems.isNotEmpty) {
+      historyItems.removeAt(0);
+    }
     int tc = 0;
     double tcost = 0;
     for (var i in historyItems) {

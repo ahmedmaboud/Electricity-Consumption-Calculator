@@ -32,6 +32,7 @@ class AuthService {
       final authResponse = await cloud.auth.signUp(
         email: email,
         password: password,
+        emailRedirectTo: 'io.supabase.flutter://login-callback',
       );
 
       final authUser = authResponse.user;
